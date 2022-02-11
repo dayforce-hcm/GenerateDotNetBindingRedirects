@@ -1,6 +1,6 @@
 ﻿using Dayforce.CSharp.ProjectAssets;
+using LibGit2Sharp;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -20,6 +20,8 @@ namespace GenerateBindingRedirects
             Linked = 4
         }
 
+        private delegate bool IsInAssertModeDelegate();
+
         private const string ASSEMBLY_BINDING_XMLNS = "urn:schemas-microsoft-com:asm.v1";
         private static readonly XmlWriterSettings s_xmlWriterSettings = new XmlWriterSettings
         {
@@ -36,7 +38,7 @@ namespace GenerateBindingRedirects
             m_pc = pc;
         }
 
-        public void WriteBindingRedirects(string bindingRedirects, bool assert)
+        public void WriteBindingRedirects(string bindingRedirects, bool assert, bool forceAssert)
         {
             var actualAppConfigStatus = ActualAppConfigStatus.Normal;
             if (ExpectedConfigFilePath.EndsWith("app.config", C.IGNORE_CASE))
@@ -62,14 +64,78 @@ namespace GenerateBindingRedirects
                 }
             }
 
-            if (!WriteConfigFile(bindingRedirects, assert) ||
+            if (!WriteConfigFile(bindingRedirects, IsInAssertMode) ||
                 actualAppConfigStatus == ActualAppConfigStatus.Normal ||
                 actualAppConfigStatus == ActualAppConfigStatus.FileNotFound)
             {
                 return;
             }
 
-            AddAppConfigToProjectFile(actualAppConfigStatus);
+            if (!m_pc.SDKStyle)
+            {
+                AddAppConfigToProjectFile(actualAppConfigStatus);
+            }
+
+            bool IsInAssertMode()
+            {
+                if (forceAssert)
+                {
+                    return true;
+                }
+
+                if (!assert)
+                {
+                    return false;
+                }
+
+                var res = IsTrackedByGit();
+                if (res)
+                {
+                    forceAssert = true;
+                }
+                else
+                {
+                    if (!File.Exists(ExpectedConfigFilePath))
+                    {
+                        UpdateGitIgnore();
+                    }
+                    assert = false;
+                }
+                return forceAssert;
+            }
+
+            bool IsTrackedByGit()
+            {
+                var wsPath = ProjectFilePath;
+                while (wsPath.Length > 3 && !Directory.Exists(wsPath + "\\.git"))
+                {
+                    wsPath = Path.GetDirectoryName(wsPath);
+                }
+                if (wsPath.Length <= 3)
+                {
+                    return true;
+                }
+                var repo = new Repository(wsPath);
+                var objectish = "HEAD:" + ExpectedConfigFilePath[(wsPath.Length + 1)..].Replace('\\', '/');
+                return repo.Lookup(objectish, ObjectType.Blob) != null;
+            }
+
+            void UpdateGitIgnore()
+            {
+                var gitIgnoreFilePath = ExpectedConfigFilePath + "\\..\\.gitignore";
+                if (File.Exists(gitIgnoreFilePath))
+                {
+                    var gitIgnoreLines = File.ReadAllLines(gitIgnoreFilePath);
+                    if (!gitIgnoreLines.Contains("app.config", C.IgnoreCase))
+                    {
+                        File.AppendAllText(gitIgnoreFilePath, "app.config\r\n");
+                    }
+                }
+                else
+                {
+                    File.WriteAllText(gitIgnoreFilePath, "app.config\r\n");
+                }
+            }
         }
 
         private void AddAppConfigToProjectFile(ActualAppConfigStatus actualAppConfigStatus)
@@ -96,7 +162,7 @@ namespace GenerateBindingRedirects
             doc.Save(ProjectFilePath);
         }
 
-        private bool WriteConfigFile(string bindingRedirects, bool assert)
+        private bool WriteConfigFile(string bindingRedirects, IsInAssertModeDelegate isInAssertMode)
         {
             if (!File.Exists(ExpectedConfigFilePath))
             {
@@ -104,11 +170,11 @@ namespace GenerateBindingRedirects
                 {
                     return false;
                 }
-                if (assert)
+                if (isInAssertMode())
                 {
                     throw new ApplicationException($"{ExpectedConfigFilePath} is expected to have some assembly binding redirects, but it does not exist.");
                 }
-                WriteNewConfigFile(bindingRedirects, assert);
+                WriteNewConfigFile(bindingRedirects, isInAssertMode);
                 return true;
             }
 
@@ -126,7 +192,7 @@ namespace GenerateBindingRedirects
                 {
                     return false;
                 }
-                if (assert)
+                if (isInAssertMode())
                 {
                     throw new ApplicationException($"{ExpectedConfigFilePath} is expected to have some assembly binding redirects, but it has none.");
                 }
@@ -134,7 +200,7 @@ namespace GenerateBindingRedirects
                 var cfg = doc.SelectSingleNode("/configuration");
                 if (cfg == null)
                 {
-                    WriteNewConfigFile(bindingRedirects, assert);
+                    WriteNewConfigFile(bindingRedirects, isInAssertMode);
                     return true;
                 }
 
@@ -165,7 +231,7 @@ namespace GenerateBindingRedirects
                 .Replace(@"<assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">", "")
                 .Replace(@"</assemblyBinding>", "");
 
-            if (assert)
+            if (isInAssertMode())
             {
                 if (curInnerXml == newInnerXml)
                 {
@@ -184,13 +250,13 @@ namespace GenerateBindingRedirects
             return true;
         }
 
-        private void WriteNewConfigFile(string bindingRedirects, bool assert)
+        private void WriteNewConfigFile(string bindingRedirects, IsInAssertModeDelegate isInAssertMode)
         {
             if (bindingRedirects.Length == 0)
             {
                 return;
             }
-            if (assert)
+            if (isInAssertMode())
             {
                 throw new ApplicationException($"{ExpectedConfigFilePath} is expected to have some assembly binding redirects, but it is empty or does not exist.");
             }
