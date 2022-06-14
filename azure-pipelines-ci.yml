@@ -51,4 +51,6 @@ jobs:
     parameters:
       packagesToPack: GenerateBindingRedirects.sln
 
+  - template: ci/label-code.yml@templates
+
   - template: ci/sonar-qube-publish.yml@templates
