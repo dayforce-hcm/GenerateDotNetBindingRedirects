@@ -7,7 +7,7 @@ trigger:
 variables:
   binDir: bin\Release\net5.0
 
-name: 2.3.$(Date:yy)$(DayOfYear)$(Rev:.r)
+name: 2.4.$(Date:yy)$(DayOfYear)$(Rev:.r)
 
 resources:
   repositories:

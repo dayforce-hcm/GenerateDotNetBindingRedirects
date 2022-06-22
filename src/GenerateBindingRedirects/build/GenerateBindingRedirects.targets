@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Target Name="WriteBindingRedirects" AfterTargets="ResolveNuGetPackageAssets;ResolvePackageAssets">
+  <Target Name="WriteBindingRedirects" AfterTargets="ResolveNuGetPackageAssets;ResolvePackageAssets"
+          Condition="'$(DesignTimeBuild)' != true OR '$(DesignTimeWriteBindingRedirects)' == true">
     <PropertyGroup>
       <GenerateBindingRedirectsExe Condition="'$(GenerateBindingRedirectsExe)' == ''">$(MSBuildThisFileDirectory)..\tools\GenerateBindingRedirects.exe</GenerateBindingRedirectsExe>
       <SolutionsListFilePath Condition="Exists('$(WorkspaceRoot)DayforceSolutions.txt')">$(WorkspaceRoot)DayforceSolutions.txt</SolutionsListFilePath>
@@ -31,7 +32,7 @@
     <Exec Command="$(GenerateBindingRedirectsExe) $(GenerateBindingRedirectsFlags) $(Extra_GenerateBindingRedirectsFlags)" />
     
     <PropertyGroup>
-      <CopyBindingRedirectTargetFiles Condition="Exists('$(BindingRedirectTargetFilesPath)') And '$(GenerateBindingRedirectsForTest)' != True">True</CopyBindingRedirectTargetFiles>
+      <_CopyBindingRedirectTargetFiles Condition="Exists('$(BindingRedirectTargetFilesPath)') And '$(GenerateBindingRedirectsForTest)' != True">True</_CopyBindingRedirectTargetFiles>
       <ReplaceAppConfig Condition="'$(WebProjectOutputDir)' == '' And '$(AppConfig)' != 'app.config' And Exists('$(BindingRedirectTargetFilesPath)') And Exists('app.config')">True</ReplaceAppConfig>
     </PropertyGroup>
     <PropertyGroup Condition="'$(ReplaceAppConfig)' == True">
@@ -47,7 +48,7 @@
 
   <Target Name="CopyBindingRedirectTargetFiles"
           BeforeTargets="MvcBuildViews;AfterBuild;RunNUnit"
-          Condition="'$(CopyBindingRedirectTargetFiles)' == True">
+          Condition="'$(_CopyBindingRedirectTargetFiles)' == True">
     <ReadLinesFromFile File="$(BindingRedirectTargetFilesPath)">
       <Output TaskParameter="Lines" ItemName="BindingRedirectTargetFile" />
     </ReadLinesFromFile>
