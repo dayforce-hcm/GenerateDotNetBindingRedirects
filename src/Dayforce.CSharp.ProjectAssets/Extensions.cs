@@ -9,6 +9,8 @@ namespace Dayforce.CSharp.ProjectAssets
 {
     public static class Extensions
     {
+        public static readonly string[] ArrayWithEmptyLine = { "" };
+
         public static void ForEach<T>(this IEnumerable<T> items, Action<T> action)
         {
             foreach (var item in items)
@@ -31,14 +33,32 @@ namespace Dayforce.CSharp.ProjectAssets
     
         public static bool IsExecutable(this string path) => path.EndsWith(".dll", C.IGNORE_CASE) || path.EndsWith(".exe", C.IGNORE_CASE);
 
+        public static void SaveAllText(this string text, string filePath)
+        {
+            if (File.Exists(filePath))
+            {
+                var oldText = File.ReadAllText(filePath);
+                if (text.Equals(oldText, C.IGNORE_CASE))
+                {
+                    return;
+                }
+            }
+            else
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+            }
+            File.WriteAllText(filePath, text);
+        }
+
+        public static void SaveAllLines(this IEnumerable<string> lines, string filePath) => string.Join(Environment.NewLine, lines.Concat(ArrayWithEmptyLine)).SaveAllText(filePath);
+
         public static void GenerateNuGetUsageReport(this ProjectAssets projectAssets, string projectName, string nuGetUsageReport)
         {
             if (Directory.Exists(nuGetUsageReport) || nuGetUsageReport[^1] == '\\')
             {
                 nuGetUsageReport = nuGetUsageReport + (nuGetUsageReport[^1] == '\\' ? "" : "\\") + "NuGetUsageReport-" + projectName + ".json";
             }
-            Directory.CreateDirectory(Path.GetDirectoryName(nuGetUsageReport));
-            File.WriteAllText(nuGetUsageReport, JsonConvert.SerializeObject(projectAssets
+            JsonConvert.SerializeObject(projectAssets
                 .Libraries
                 .Where(o => o.Value.Type == C.PACKAGE && o.Value.HasRuntimeAssemblies)
                 .ToDictionary(o => o.Key, o => new
@@ -46,7 +66,7 @@ namespace Dayforce.CSharp.ProjectAssets
                     NuGetVersion = o.Value.Version.ToString(),
                     Metadata = GetMetadata(projectAssets.PackageFolders, o.Key, o.Value),
                     RuntimeAssemblies = o.Value.Library.RuntimeAssemblies.Select(o => Path.GetFileName(o.Path))
-                }), Formatting.Indented));
+                }), Formatting.Indented).SaveAllText(nuGetUsageReport);
         }
 
         private static object GetMetadata(List<string> packageFolders, string packageId, LibraryItem value)

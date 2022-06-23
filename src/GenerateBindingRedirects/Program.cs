@@ -258,8 +258,7 @@ namespace GenerateBindingRedirects
                 }
                 else
                 {
-                    Directory.CreateDirectory($"{outputTargetFiles}\\..");
-                    File.WriteAllLines(outputTargetFiles, targetFiles);
+                    targetFiles.SaveAllLines(outputTargetFiles);
                 }
             }
 
@@ -305,8 +304,7 @@ namespace GenerateBindingRedirects
                     }
                     else
                     {
-                        Directory.CreateDirectory($"{outputBindingRedirects}\\..");
-                        File.WriteAllText(outputBindingRedirects, res);
+                        res.SaveAllText(outputBindingRedirects);
                     }
                 }
 
