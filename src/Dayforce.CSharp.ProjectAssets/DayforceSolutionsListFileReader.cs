@@ -1,9 +1,8 @@
-﻿using Dayforce.CSharp.ProjectAssets;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace GenerateBindingRedirects
+namespace Dayforce.CSharp.ProjectAssets
 {
     public class DayforceSolutionsListFileReader : ISolutionsListFileReader
     {

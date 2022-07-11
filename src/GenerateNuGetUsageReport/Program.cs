@@ -20,7 +20,7 @@ namespace GenerateNuGetUsageReport
             var options = new OptionSet()
                 .Add("h|help|?", "Show help", _ => help = true)
                 .Add("v|verbose:", $"Produces verbose output. May be given a custom directory path where to collect extended information. Defaults to {logPath}", v => { logPath = v ?? logPath; verbose = true; })
-                .Add("f|projectFile=", "[Required] The project file.", v => projectFilePath = v)
+                .Add("f|projectFile=", "[Required] The project file.", v => projectFilePath = Path.GetFullPath(v))
                 .Add("s|solutions=", "[Required] A file listing all the relevant solutions.", v => solutionsListFile = v)
                 .Add("u|nuGetUsageReport=", "[Required] Generate a report listing all the nuget packages on which the given project depends and save it under the given file path.", v => nuGetUsageReport = v)
             ;
@@ -69,12 +69,23 @@ namespace GenerateNuGetUsageReport
             {
                 if (verbose)
                 {
-                    var baseDir = Path.GetFullPath(solutionsListFile + "\\..");
+                    var baseDir = solutionsListFile + "\\..";
+                    if (solutionsListFile.EndsWith("\\build\\projects.yml", C.IGNORE_CASE))
+                    {
+                        baseDir += "\\..";
+                    }
+                    baseDir = Path.GetFullPath(baseDir);
+
                     VerboseLog verboseLog;
                     Log.Instance = verboseLog = new VerboseLog("GenerateNuGetUsageReport", logPath, baseDir, projectFilePath, false);
                     LogFilePath = verboseLog.LogFilePath;
                 }
+
                 var sc = new SolutionsContext(solutionsListFile, new SimpleSolutionsListFileReader());
+                if (sc.ProjectsByAssemblyName.Count == 0)
+                {
+                    sc = new(solutionsListFile, new DayforceSolutionsListFileReader());
+                }
                 var focus = sc.GetProjectContext(projectFilePath);
                 if (focus == null)
                 {

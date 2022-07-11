@@ -2,7 +2,8 @@
   "profiles": {
     "GenerateNuGetUsageReport": {
       "commandName": "Project",
-      "commandLineArgs": "-s C:\\dayforce\\fintech\\build-solutions.yml -f C:\\dayforce\\fintech\\src/Gateway/Gateway/Gateway.csproj -u c:\\temp -v:c:\\temp\\1"
+      "commandLineArgs": "-s tip3\\build\\projects.yml -f tip3\\src\\Architecture\\Common\\Common.csproj -u c:\\temp -v:c:\\temp\\1",
+      "workingDirectory": "c:\\dayforce"
     }
   }
 }
