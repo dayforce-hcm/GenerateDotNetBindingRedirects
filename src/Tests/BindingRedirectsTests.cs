@@ -60,11 +60,11 @@ namespace Tests
             var configFile = Path.GetFullPath($"{projectFilePath}\\..\\{(projectFilePath.EndsWith("BJE.csproj") || projectFilePath.EndsWith("Tests.csproj") ? "app" : "web")}.config");
             if (newAppConfig)
             {
-                FileAssert.DoesNotExist(configFile, "The config file is not supposed to exist before the test.");
+                Assert.That(configFile, Does.Not.Exist, "The config file is not supposed to exist before the test.");
             }
             else if (!s_updateExpectedResults)
             {
-                FileAssert.Exists(configFile, "Failed to locate the config file.");
+                Assert.That(configFile, Does.Exist, "Failed to locate the config file.");
             }
             return configFile;
         }
@@ -122,10 +122,10 @@ namespace Tests
         public void Generate(string projectFilePath, string expectedDir, bool newAppConfig, bool _2)
         {
             var actualTargetFilesFilePath = $"{GlobalContext.OutputDir}\\TargetFiles.txt";
-            FileAssert.DoesNotExist(actualTargetFilesFilePath);
+            Assert.That(actualTargetFilesFilePath, Does.Not.Exist);
 
             var actualBindingRedirectsFilePath = $"{GlobalContext.OutputDir}\\BindingRedirects.txt";
-            FileAssert.DoesNotExist(actualBindingRedirectsFilePath);
+            Assert.That(actualBindingRedirectsFilePath, Does.Not.Exist);
             string configFile = GetConfigFile(projectFilePath, newAppConfig);
             var expectedConfigFileTimestamp = s_updateExpectedResults || newAppConfig ? default : File.GetLastWriteTimeUtc(configFile);
 
@@ -150,8 +150,8 @@ namespace Tests
                 args.Add("--outDir=bin");
             }
 
-            Assert.Zero(Program.Main(args.ToArray()));
-            Assert.IsNotNull(Log.LogFilePath, "Actual verbose log file not found.");
+            Assert.That(Program.Main([.. args]), Is.Zero);
+            Assert.That(Log.LogFilePath, Is.Not.Null, "Actual verbose log file not found.");
 
             if (s_updateExpectedResults)
             {
@@ -161,15 +161,15 @@ namespace Tests
             }
             else
             {
-                FileAssert.AreEqual($"{expectedDir}\\TargetFiles.txt", actualTargetFilesFilePath, "Target files do not match");
-                FileAssert.AreEqual($"{expectedDir}\\BindingRedirects.txt", actualBindingRedirectsFilePath, "Binding Redirects do not match");
+                NUnit.Framework.Legacy.FileAssert.AreEqual($"{expectedDir}\\TargetFiles.txt", actualTargetFilesFilePath, "Target files do not match");
+                NUnit.Framework.Legacy.FileAssert.AreEqual($"{expectedDir}\\BindingRedirects.txt", actualBindingRedirectsFilePath, "Binding Redirects do not match");
                 if (newAppConfig)
                 {
-                    FileAssert.Exists(configFile, $"The config file {configFile} was not created.");
+                    Assert.That(configFile, Does.Exist, $"The config file {configFile} was not created.");
                 }
                 else
                 {
-                    Assert.AreEqual(expectedConfigFileTimestamp, File.GetLastWriteTimeUtc(configFile), $"The config file {configFile} was modified.");
+                    Assert.That(expectedConfigFileTimestamp, Is.EqualTo(File.GetLastWriteTimeUtc(configFile)), $"The config file {configFile} was modified.");
                 }
             }
             File.Move(Log.LogFilePath, $"{expectedDir}\\Verbose.log", true);
@@ -187,7 +187,7 @@ namespace Tests
             var expectedConfigFile = $"{GlobalContext.OutputDir}\\Config.xml";
             var actualConfigFile = GetConfigFile(projectFilePath);
             File.Move(actualConfigFile, expectedConfigFile);
-            FileAssert.DoesNotExist(actualConfigFile);
+            Assert.That(actualConfigFile, Does.Not.Exist);
 
             try
             {
@@ -198,7 +198,7 @@ namespace Tests
                     $"{GlobalContext.RootDir}\\Input\\Solutions.txt",
                     null, null, true, outDir, usePrivateProbingPath: usePrivateProbingPath);
 
-                FileAssert.AreEqual(expectedConfigFile, actualConfigFile);
+                NUnit.Framework.Legacy.FileAssert.AreEqual(expectedConfigFile, actualConfigFile);
             }
             finally
             {
@@ -249,7 +249,7 @@ namespace Tests
                 skip = line.Contains(openTag);
                 return !skip;
             }));
-            FileAssert.AreNotEqual(expectedConfigFile, actualConfigFile);
+            NUnit.Framework.Legacy.FileAssert.AreNotEqual(expectedConfigFile, actualConfigFile);
 
             try
             {
@@ -260,7 +260,7 @@ namespace Tests
                     $"{GlobalContext.RootDir}\\Input\\Solutions.txt",
                     null, null, true, outDir, usePrivateProbingPath: usePrivateProbingPath);
 
-                FileAssert.AreEqual(expectedConfigFile, actualConfigFile);
+                NUnit.Framework.Legacy.FileAssert.AreEqual(expectedConfigFile, actualConfigFile);
             }
             finally
             {
@@ -292,9 +292,9 @@ namespace Tests
                 bindingRedirectsFilePath,
                 true, outDir, true, true, usePrivateProbingPath: usePrivateProbingPath);
 
-            FileAssert.AreEqual($"{expectedDir}\\TargetFiles.txt", actualTargetFilesFilePath, "Target files do not match");
-            Assert.AreEqual(expectedBindingRedirectsFileTimestamp, File.GetLastWriteTimeUtc(bindingRedirectsFilePath), $"The binding redirects file {bindingRedirectsFilePath} was modified.");
-            Assert.AreEqual(expectedConfigFileTimestamp, File.GetLastWriteTimeUtc(configFile), $"The config file {configFile} was modified.");
+            NUnit.Framework.Legacy.FileAssert.AreEqual($"{expectedDir}\\TargetFiles.txt", actualTargetFilesFilePath, "Target files do not match");
+            Assert.That(expectedBindingRedirectsFileTimestamp, Is.EqualTo(File.GetLastWriteTimeUtc(bindingRedirectsFilePath)), $"The binding redirects file {bindingRedirectsFilePath} was modified.");
+            Assert.That(expectedConfigFileTimestamp, Is.EqualTo(File.GetLastWriteTimeUtc(configFile)), $"The config file {configFile} was modified.");
         }
 
         [TestCaseSource(nameof(ATestCase))]
@@ -307,7 +307,7 @@ namespace Tests
             }
 
             var nonExistingBindingRedirectsFilePath = $"{GlobalContext.OutputDir}\\BindingRedirects.txt";
-            FileAssert.DoesNotExist(nonExistingBindingRedirectsFilePath);
+            Assert.That(nonExistingBindingRedirectsFilePath, Does.Not.Exist);
 
             var exc = Assert.Throws<ApplicationException>(() => Program.Run(
                 projectFilePath,
@@ -316,7 +316,7 @@ namespace Tests
                 nonExistingBindingRedirectsFilePath,
                 false, null, true));
 
-            Assert.AreEqual($"Found some binding redirects, but {nonExistingBindingRedirectsFilePath} does not exist.", exc.Message);
+            Assert.That($"Found some binding redirects, but {nonExistingBindingRedirectsFilePath} does not exist.", Is.EqualTo(exc.Message));
         }
 
         [TestCaseSource(nameof(ATestCase))]
@@ -331,7 +331,7 @@ namespace Tests
             var mismatchingBindingRedirectsFilePath = $"{GlobalContext.OutputDir}\\BindingRedirects.txt";
             string expectedBindingRedirectsFilePath = $"{expectedDir}\\BindingRedirects.txt";
             File.WriteAllLines(mismatchingBindingRedirectsFilePath, File.ReadAllLines(expectedBindingRedirectsFilePath).Skip(4));
-            FileAssert.AreNotEqual(expectedBindingRedirectsFilePath, mismatchingBindingRedirectsFilePath);
+            NUnit.Framework.Legacy.FileAssert.AreNotEqual(expectedBindingRedirectsFilePath, mismatchingBindingRedirectsFilePath);
 
             var exc = Assert.Throws<ApplicationException>(() => Program.Run(
                 projectFilePath,
@@ -340,7 +340,7 @@ namespace Tests
                 mismatchingBindingRedirectsFilePath,
                 false, null, true));
 
-            Assert.AreEqual($"Actual binding redirects in {mismatchingBindingRedirectsFilePath} do not match the expectation.", exc.Message);
+            Assert.That($"Actual binding redirects in {mismatchingBindingRedirectsFilePath} do not match the expectation.", Is.EqualTo(exc.Message));
         }
 
         [TestCaseSource(nameof(NewConfigFileTestCase))]
@@ -353,7 +353,7 @@ namespace Tests
             }
 
             var configFilePath = Path.GetFullPath($"{projectFilePath}\\..\\app.config");
-            FileAssert.DoesNotExist(configFilePath);
+            Assert.That(configFilePath, Does.Not.Exist);
 
             var exc = Assert.Throws<ApplicationException>(() => Program.Run(
                 projectFilePath,
@@ -362,7 +362,7 @@ namespace Tests
                 null,
                 false, null, forceAssert: true));
 
-            Assert.AreEqual($"{configFilePath} is expected to have some assembly binding redirects, but it does not exist.", exc.Message);
+            Assert.That($"{configFilePath} is expected to have some assembly binding redirects, but it does not exist.", Is.EqualTo(exc.Message));
         }
 
         [TestCaseSource(nameof(NewConfigFileTestCase))]
@@ -376,8 +376,8 @@ namespace Tests
 
             var configFilePath = Path.GetFullPath($"{projectFilePath}\\..\\app.config");
             string gitIgnoreFilePath = configFilePath + "\\..\\.gitignore";
-            FileAssert.DoesNotExist(configFilePath);
-            FileAssert.DoesNotExist(gitIgnoreFilePath);
+            Assert.That(configFilePath, Does.Not.Exist);
+            Assert.That(gitIgnoreFilePath, Does.Not.Exist);
 
             Program.Run(
                 projectFilePath,
@@ -386,8 +386,8 @@ namespace Tests
                 null,
                 false, null, true);
 
-            FileAssert.Exists(configFilePath);
-            FileAssert.DoesNotExist(gitIgnoreFilePath);
+            Assert.That(configFilePath, Does.Exist);
+            Assert.That(gitIgnoreFilePath, Does.Not.Exist);
         }
 
         [TestCaseSource(nameof(NewConfigFileTestCase))]
@@ -400,7 +400,7 @@ namespace Tests
             }
 
             var configFilePath = Path.GetFullPath($"{projectFilePath}\\..\\app.config");
-            FileAssert.DoesNotExist(configFilePath);
+            Assert.That(configFilePath, Does.Not.Exist);
             File.Copy($"{projectFilePath}\\..\\MismatchingApp.config", configFilePath);
 
             var exc = Assert.Throws<ApplicationException>(() => Program.Run(
@@ -410,7 +410,7 @@ namespace Tests
                 null,
                 false, null, forceAssert: true));
 
-            Assert.AreEqual($"{configFilePath} does not have the expected set of binding redirects.", exc.Message);
+            Assert.That($"{configFilePath} does not have the expected set of binding redirects.", Is.EqualTo(exc.Message));
         }
     }
 }

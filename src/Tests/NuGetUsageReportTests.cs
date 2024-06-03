@@ -46,8 +46,8 @@ namespace Tests
                 "-v:" + GlobalContext.OutputDir
             };
 
-            Assert.Zero(Program.Main(args.ToArray()));
-            Assert.IsNotNull(Program.LogFilePath, "Actual verbose log file not found.");
+            Assert.That(Program.Main([.. args]), Is.Zero);
+            Assert.That(Program.LogFilePath, Is.Not.Null, "Actual verbose log file not found.");
 
             if (s_updateExpectedResults)
             {
@@ -56,7 +56,7 @@ namespace Tests
             }
             else
             {
-                FileAssert.AreEqual(expectedDir + REPORT_FILE_NAME, GlobalContext.OutputDir + REPORT_FILE_NAME, "Report files do not match");
+                NUnit.Framework.Legacy.FileAssert.AreEqual(expectedDir + REPORT_FILE_NAME, GlobalContext.OutputDir + REPORT_FILE_NAME, "Report files do not match");
             }
             File.Move(Program.LogFilePath, expectedDir + "Verbose.log", true);
         }

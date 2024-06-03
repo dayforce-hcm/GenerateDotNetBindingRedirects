@@ -34,7 +34,7 @@ namespace Tests
         [OneTimeSetUp]
         public static void SetUp()
         {
-            Assert.IsNotNull(MSBuildExe, "Failed to find msbuild.exe");
+            Assert.That(MSBuildExe, Is.Not.Null, "Failed to find msbuild.exe");
         }
     }
 }

@@ -3,7 +3,7 @@
 trigger: none
 
 variables:
-  binDir: bin\Release\net6.0
+  binDir: bin\Release\net8.0
 
 name: 0.0.$(Date:yy)$(DayOfYear)$(Rev:.r)
 
@@ -12,8 +12,8 @@ resources:
   - repository: templates
     type: git
     name: DFDevOps\cicd-templates
-    ref: refs/tags/stable-2
-    # http://tdc1tfsapp01:8080/tfs/DefaultCollection/DFDevOps/_git/cicd-templates    
+    ref: stable-2-cov
+    # https://dev.azure.com/Ceridian/DFDevOps/_git/cicd-templates
 
 jobs:
 - job: Build
@@ -25,7 +25,24 @@ jobs:
   - template: ci/variables.yml@templates
 
   steps:
+  - checkout: self
+    clean: true
+    lfs: false
+    displayName: Checkout ${{ variables['Build.Repository.Name'] }}
+
+  - task: UseDotNet@2
+    displayName: Use .NET Core sdk 6.x
+    inputs:
+      version: 6.x
+
+  - script: |
+      echo {"sdk":{"version":"6.x"}} > $(Build.Repository.Name)\src\Tests\Input\5\global.json
+    displayName: Create src\Tests\Input\5\global.json
+
   - template: ci/build-and-test.yml@templates
+    parameters:
+      checkout: false
+      dotNetCoreVersion: 8.x
 
   - template: ci/nuget-pack-as-tool.yml@templates
     parameters:
