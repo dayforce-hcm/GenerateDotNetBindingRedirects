@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Dayforce.CSharp.ProjectAssets;
 using GenerateBindingRedirects;
 using NUnit.Framework;
+using Log = GenerateBindingRedirects.Log;
 
 namespace Tests
 {
@@ -12,12 +14,10 @@ namespace Tests
     {
         private static readonly bool s_updateExpectedResults = false;
 
-        public static IEnumerable<TestCaseData> AllTestCases => (new (string, bool, bool)[]
+        public static IEnumerable<TestCaseData> ManyTestCases => (new (string, bool, bool)[]
         {
-            ("1\\DataSvc", false, false),
             ("1\\BJE", true, false),
             ("1\\ReportingSvc", false, false),
-            ("1\\CommonTests", false, true),
             ("1\\RuleEngineTests", false, false),
             ("1\\UnitTests", true, true),
             ("2\\CandidatePortal", false, false),
@@ -25,23 +25,25 @@ namespace Tests
             ("3\\Api", false, false),
             ("3\\OData", false, false),
             ("4\\Clock", false, false)
-        }).Select(path => CreateTestCase(path));
+        }).Select(CreateTestCase);
 
-        public static TestCaseData[] AFewTestCases => new[]
-        {
+        public static TestCaseData[] AFewTestCases =>
+        [
             CreateTestCase(("1\\DataSvc", false, false)),
             CreateTestCase(("1\\CommonTests", false, true))
-        };
+        ];
 
-        public static TestCaseData[] ATestCase => new[]
-        {
+        public static TestCaseData[] ATestCase =>
+        [
             CreateTestCase(("1\\DataSvc", false, false))
-        };
+        ];
 
-        public static TestCaseData[] NewConfigFileTestCase => new[]
-        {
+        public static TestCaseData[] NewConfigFileTestCase =>
+        [
             CreateTestCase(("1\\UnitTests", true, true))
-        };
+        ];
+
+        private readonly List<string> m_tempFilePaths = [];
 
         private static TestCaseData CreateTestCase((string Path, bool NewAppConfig, bool ModifiesProjectFile) a)
         {
@@ -49,15 +51,16 @@ namespace Tests
                 $"{GlobalContext.RootDir}\\Input\\{a.Path}\\{Path.GetFileName(a.Path)}.csproj",
                 $"{GlobalContext.RootDir}\\Expected\\{a.Path}",
                 a.NewAppConfig,
-                a.ModifiesProjectFile)
+                a.ModifiesProjectFile,
+                $"src\\Tests\\Input\\{a.Path}\\.gitignore")
             {
                 TestName = $"{{m}}({a.Path})"
             };
         }
 
-        private static string GetConfigFile(string projectFilePath, bool newAppConfig = false)
+        private string GetConfigFile(string projectFilePath, bool newAppConfig = false, string configFileFlavour = null)
         {
-            var configFile = Path.GetFullPath($"{projectFilePath}\\..\\{(projectFilePath.EndsWith("BJE.csproj") || projectFilePath.EndsWith("Tests.csproj") ? "app" : "web")}.config");
+            var configFile = Path.GetFullPath($"{projectFilePath}\\..\\{(projectFilePath.EndsWith("BJE.csproj") || projectFilePath.EndsWith("Tests.csproj") ? "app" : "web")}{configFileFlavour}.config");
             if (newAppConfig)
             {
                 Assert.That(configFile, Does.Not.Exist, "The config file is not supposed to exist before the test.");
@@ -65,6 +68,12 @@ namespace Tests
             else if (!s_updateExpectedResults)
             {
                 Assert.That(configFile, Does.Exist, "Failed to locate the config file.");
+            }
+            if (configFileFlavour != null)
+            {
+                var finalConfigFile = configFile.Replace(configFileFlavour, "");
+                File.Copy(configFile, finalConfigFile, true);
+                m_tempFilePaths.Add(configFile = finalConfigFile);
             }
             return configFile;
         }
@@ -116,10 +125,12 @@ namespace Tests
                 File.Delete($"{projectFile}\\..\\app.config");
                 File.Delete($"{projectFile}\\..\\.gitignore");
             }
+            m_tempFilePaths.ForEach(File.Delete);
+            m_tempFilePaths.Clear();
         }
 
-        [TestCaseSource(nameof(AllTestCases))]
-        public void Generate(string projectFilePath, string expectedDir, bool newAppConfig, bool _2)
+        [TestCaseSource(nameof(ManyTestCases))]
+        public void Generate(string projectFilePath, string expectedDir, bool newAppConfig, bool _, string _2)
         {
             var actualTargetFilesFilePath = $"{GlobalContext.OutputDir}\\TargetFiles.txt";
             Assert.That(actualTargetFilesFilePath, Does.Not.Exist);
@@ -127,7 +138,13 @@ namespace Tests
             var actualBindingRedirectsFilePath = $"{GlobalContext.OutputDir}\\BindingRedirects.txt";
             Assert.That(actualBindingRedirectsFilePath, Does.Not.Exist);
             string configFile = GetConfigFile(projectFilePath, newAppConfig);
+            string gitIgnoreFilePath = configFile + "\\..\\.gitignore";
             var expectedConfigFileTimestamp = s_updateExpectedResults || newAppConfig ? default : File.GetLastWriteTimeUtc(configFile);
+
+            Assert.That(gitIgnoreFilePath, Does.Not.Exist);
+            m_tempFilePaths.Add(gitIgnoreFilePath);
+
+            using var noVersionControlScope = new NoGitVersionControl.Scope();
 
             var args = new List<string>
             {
@@ -152,6 +169,7 @@ namespace Tests
 
             Assert.That(Program.Main([.. args]), Is.Zero);
             Assert.That(Log.LogFilePath, Is.Not.Null, "Actual verbose log file not found.");
+            Assert.That(gitIgnoreFilePath, Does.Exist);
 
             if (s_updateExpectedResults)
             {
@@ -176,7 +194,7 @@ namespace Tests
         }
 
         [TestCaseSource(nameof(AFewTestCases))]
-        public void GenerateCreateNewConfigFile(string projectFilePath, string _, bool _1, bool _2)
+        public void GenerateCreateNewConfigFile(string projectFilePath, string _, bool _1, bool _2, string _3)
         {
             if (s_updateExpectedResults)
             {
@@ -185,9 +203,13 @@ namespace Tests
             }
 
             var expectedConfigFile = $"{GlobalContext.OutputDir}\\Config.xml";
-            var actualConfigFile = GetConfigFile(projectFilePath);
+            var actualConfigFile = GetConfigFile(projectFilePath, configFileFlavour: "-only-binding-redirects");
             File.Move(actualConfigFile, expectedConfigFile);
             Assert.That(actualConfigFile, Does.Not.Exist);
+
+            var gitIgnoreFile = actualConfigFile + @"\..\.gitignore";
+            Assert.That(gitIgnoreFile, Does.Not.Exist);
+            m_tempFilePaths.Add(gitIgnoreFile);
 
             try
             {
@@ -204,27 +226,29 @@ namespace Tests
             {
                 File.Move(expectedConfigFile, actualConfigFile, true);
             }
+
+            Assert.That(gitIgnoreFile, Does.Exist);
         }
 
-        [TestCaseSource(nameof(AFewTestCases))]
-        public void GenerateOverwriteMismatchingConfigFileNoRuntimeElement(string projectFilePath, string _, bool _1, bool _2)
+        [TestCaseSource(nameof(ATestCase))]
+        public void GenerateOverwriteMismatchingConfigFileNoRuntimeElement(string projectFilePath, string _, bool _1, bool _2, string _3)
         {
             GenerateOverwriteMismatchingConfigFile(projectFilePath, "runtime");
         }
 
-        [TestCaseSource(nameof(AFewTestCases))]
-        public void GenerateOverwriteMismatchingConfigFileNoAssemblyBindingElement(string projectFilePath, string _, bool _1, bool _2)
+        [TestCaseSource(nameof(ATestCase))]
+        public void GenerateOverwriteMismatchingConfigFileNoAssemblyBindingElement(string projectFilePath, string _, bool _1, bool _2, string _3)
         {
             GenerateOverwriteMismatchingConfigFile(projectFilePath, "assemblyBinding");
         }
 
-        [TestCaseSource(nameof(AFewTestCases))]
-        public void GenerateOverwriteMismatchingConfigFileNoDependentAssemblyElement(string projectFilePath, string _, bool _1, bool _2)
+        [TestCaseSource(nameof(ATestCase))]
+        public void GenerateOverwriteMismatchingConfigFileNoDependentAssemblyElement(string projectFilePath, string _, bool _1, bool _2, string _3)
         {
             GenerateOverwriteMismatchingConfigFile(projectFilePath, "dependentAssembly");
         }
 
-        private static void GenerateOverwriteMismatchingConfigFile(string projectFilePath, string elementName)
+        private void GenerateOverwriteMismatchingConfigFile(string projectFilePath, string elementName)
         {
             if (s_updateExpectedResults)
             {
@@ -236,7 +260,7 @@ namespace Tests
             var closeTag = "</" + elementName + ">";
 
             var expectedConfigFile = $"{GlobalContext.OutputDir}\\Config.xml";
-            var actualConfigFile = GetConfigFile(projectFilePath);
+            var actualConfigFile = GetConfigFile(projectFilePath, configFileFlavour: "-with-other-stuff");
             File.Move(actualConfigFile, expectedConfigFile);
             var skip = false;
             File.WriteAllLines(actualConfigFile, File.ReadLines(expectedConfigFile).Where(line =>
@@ -250,6 +274,10 @@ namespace Tests
                 return !skip;
             }));
             NUnit.Framework.Legacy.FileAssert.AreNotEqual(expectedConfigFile, actualConfigFile);
+
+            var gitIgnoreFile = actualConfigFile + @"\..\.gitignore";
+            Assert.That(gitIgnoreFile, Does.Not.Exist);
+            m_tempFilePaths.Add(gitIgnoreFile);
 
             try
             {
@@ -266,10 +294,12 @@ namespace Tests
             {
                 File.Move(expectedConfigFile, actualConfigFile, true);
             }
+
+            Assert.That(gitIgnoreFile, Does.Exist);
         }
 
         [TestCaseSource(nameof(AFewTestCases))]
-        public void AssertPass(string projectFilePath, string expectedDir, bool _1, bool _2)
+        public void AssertPassInVersionControl(string projectFilePath, string expectedDir, bool _1, bool _2, string _3)
         {
             if (s_updateExpectedResults)
             {
@@ -277,11 +307,16 @@ namespace Tests
                 return;
             }
 
+            using var forceGitVersionControlScope = new ForceGitVersionControl.Scope();
+
             var actualTargetFilesFilePath = $"{GlobalContext.OutputDir}\\TargetFiles.txt";
             var bindingRedirectsFilePath = $"{expectedDir}\\BindingRedirects.txt";
             var expectedBindingRedirectsFileTimestamp = File.GetLastWriteTimeUtc(bindingRedirectsFilePath);
-            var configFile = GetConfigFile(projectFilePath);
+            var configFile = GetConfigFile(projectFilePath, configFileFlavour: "-with-other-stuff");
             var expectedConfigFileTimestamp = File.GetLastWriteTimeUtc(configFile);
+
+            var gitIgnoreFile = configFile + @"\..\.gitignore";
+            Assert.That(gitIgnoreFile, Does.Not.Exist);
 
             var (outDir, usePrivateProbingPath) = projectFilePath.EndsWith("Tests.csproj") ? ("bin", true) : default;
 
@@ -295,10 +330,75 @@ namespace Tests
             NUnit.Framework.Legacy.FileAssert.AreEqual($"{expectedDir}\\TargetFiles.txt", actualTargetFilesFilePath, "Target files do not match");
             Assert.That(expectedBindingRedirectsFileTimestamp, Is.EqualTo(File.GetLastWriteTimeUtc(bindingRedirectsFilePath)), $"The binding redirects file {bindingRedirectsFilePath} was modified.");
             Assert.That(expectedConfigFileTimestamp, Is.EqualTo(File.GetLastWriteTimeUtc(configFile)), $"The config file {configFile} was modified.");
+            Assert.That(gitIgnoreFile, Does.Not.Exist);
         }
 
         [TestCaseSource(nameof(ATestCase))]
-        public void AssertFailNoBindingRedirectsTxtFile(string projectFilePath, string _, bool _1, bool _2)
+        public void FailOnlyBindingRedirectsInVersionControl(string projectFilePath, string expectedDir, bool _1, bool _2, string _3)
+        {
+            if (s_updateExpectedResults)
+            {
+                Assert.Ignore($"The test is irrelevant when updating the expected results.");
+                return;
+            }
+
+            using var forceGitVersionControlScope = new ForceGitVersionControl.Scope();
+
+            var actualTargetFilesFilePath = $"{GlobalContext.OutputDir}\\TargetFiles.txt";
+            var bindingRedirectsFilePath = $"{expectedDir}\\BindingRedirects.txt";
+            var expectedBindingRedirectsFileTimestamp = File.GetLastWriteTimeUtc(bindingRedirectsFilePath);
+            var configFile = GetConfigFile(projectFilePath, configFileFlavour: "-only-binding-redirects");
+            var expectedConfigFileTimestamp = File.GetLastWriteTimeUtc(configFile);
+
+            var gitIgnoreFile = configFile + @"\..\.gitignore";
+            Assert.That(gitIgnoreFile, Does.Not.Exist);
+
+            var (outDir, usePrivateProbingPath) = projectFilePath.EndsWith("Tests.csproj") ? ("bin", true) : default;
+
+            var exc = Assert.Throws<ApplicationException>(() => Program.Run(
+                projectFilePath,
+                $"{GlobalContext.RootDir}\\Input\\Solutions.txt",
+                actualTargetFilesFilePath,
+                bindingRedirectsFilePath,
+                true, outDir, true, true, usePrivateProbingPath: usePrivateProbingPath));
+
+            Assert.That($"{configFile.GetRelativeToGitWorkspaceRoot()} only contains binding redirects. Remove this file from the version control. Make sure to commit the .gitignore file instead. It is created or updated automatically by the local build, if that file does not exist or does not ignore app.config already.", Is.EqualTo(exc.Message));
+            Assert.That(gitIgnoreFile, Does.Not.Exist);
+        }
+
+        [TestCaseSource(nameof(ATestCase))]
+        public void PassOnlyBindingRedirectsOutsideVersionControl(string projectFilePath, string expectedDir, bool _1, bool _2, string _3)
+        {
+            if (s_updateExpectedResults)
+            {
+                Assert.Ignore($"The test is irrelevant when updating the expected results.");
+                return;
+            }
+
+            var actualTargetFilesFilePath = $"{GlobalContext.OutputDir}\\TargetFiles.txt";
+            var bindingRedirectsFilePath = $"{expectedDir}\\BindingRedirects.txt";
+            var expectedBindingRedirectsFileTimestamp = File.GetLastWriteTimeUtc(bindingRedirectsFilePath);
+            var configFile = GetConfigFile(projectFilePath, configFileFlavour: "-only-binding-redirects");
+            var expectedConfigFileTimestamp = File.GetLastWriteTimeUtc(configFile);
+
+            var gitIgnoreFile = configFile + @"\..\.gitignore";
+            Assert.That(gitIgnoreFile, Does.Not.Exist);
+            m_tempFilePaths.Add(gitIgnoreFile);
+
+            File.WriteAllText(gitIgnoreFile, "app.config\r\n");
+
+            var (outDir, usePrivateProbingPath) = projectFilePath.EndsWith("Tests.csproj") ? ("bin", true) : default;
+
+            Program.Run(
+                projectFilePath,
+                $"{GlobalContext.RootDir}\\Input\\Solutions.txt",
+                actualTargetFilesFilePath,
+                bindingRedirectsFilePath,
+                true, outDir, true, true, usePrivateProbingPath: usePrivateProbingPath);
+        }
+
+        [TestCaseSource(nameof(ATestCase))]
+        public void AssertFailNoBindingRedirectsTxtFile(string projectFilePath, string _, bool _1, bool _2, string _3)
         {
             if (s_updateExpectedResults)
             {
@@ -320,7 +420,7 @@ namespace Tests
         }
 
         [TestCaseSource(nameof(ATestCase))]
-        public void AssertFailMismatchingBindingRedirectsInTxtFile(string projectFilePath, string expectedDir, bool _1, bool _2)
+        public void AssertFailMismatchingBindingRedirectsInTxtFile(string projectFilePath, string expectedDir, bool _1, bool _2, string _3)
         {
             if (s_updateExpectedResults)
             {
@@ -344,7 +444,7 @@ namespace Tests
         }
 
         [TestCaseSource(nameof(NewConfigFileTestCase))]
-        public void ForceAssertFailNoConfigFile(string projectFilePath, string _, bool _1, bool _2)
+        public void ForceAssertFailNoConfigFile(string projectFilePath, string _, bool _1, bool _2, string _3)
         {
             if (s_updateExpectedResults)
             {
@@ -362,11 +462,11 @@ namespace Tests
                 null,
                 false, null, forceAssert: true));
 
-            Assert.That($"{configFilePath} is expected to have some assembly binding redirects, but it does not exist.", Is.EqualTo(exc.Message));
+            Assert.That($"{configFilePath.GetRelativeToGitWorkspaceRoot()} is expected to have some assembly binding redirects, but it does not exist.", Is.EqualTo(exc.Message));
         }
 
         [TestCaseSource(nameof(NewConfigFileTestCase))]
-        public void AssertNoFailNoConfigFile(string projectFilePath, string _, bool _1, bool _2)
+        public void AssertNoFailNewConfigFileWithGitIgnore(string projectFilePath, string _, bool _1, bool _2, string _3)
         {
             if (s_updateExpectedResults)
             {
@@ -375,9 +475,11 @@ namespace Tests
             }
 
             var configFilePath = Path.GetFullPath($"{projectFilePath}\\..\\app.config");
-            string gitIgnoreFilePath = configFilePath + "\\..\\.gitignore";
             Assert.That(configFilePath, Does.Not.Exist);
+
+            var gitIgnoreFilePath = configFilePath + "\\..\\.gitignore";
             Assert.That(gitIgnoreFilePath, Does.Not.Exist);
+            File.WriteAllText(gitIgnoreFilePath, "app.config\r\n");
 
             Program.Run(
                 projectFilePath,
@@ -387,11 +489,11 @@ namespace Tests
                 false, null, true);
 
             Assert.That(configFilePath, Does.Exist);
-            Assert.That(gitIgnoreFilePath, Does.Not.Exist);
+            Assert.That(gitIgnoreFilePath, Does.Exist);
         }
 
         [TestCaseSource(nameof(NewConfigFileTestCase))]
-        public void ForceAssertFailMismatchingBindingRedirectsInConfigFile(string projectFilePath, string _, bool _1, bool _2)
+        public void AssertFailNewConfigFileNoGitIgnore(string projectFilePath, string _, bool _1, bool _2, string expectedRelGitConfigPath)
         {
             if (s_updateExpectedResults)
             {
@@ -400,8 +502,38 @@ namespace Tests
             }
 
             var configFilePath = Path.GetFullPath($"{projectFilePath}\\..\\app.config");
+            var gitIgnoreFilePath = configFilePath + "\\..\\.gitignore";
             Assert.That(configFilePath, Does.Not.Exist);
-            File.Copy($"{projectFilePath}\\..\\MismatchingApp.config", configFilePath);
+            Assert.That(gitIgnoreFilePath, Does.Not.Exist);
+
+            var exc = Assert.Throws<ApplicationException>(() => Program.Run(
+                projectFilePath,
+                $"{GlobalContext.RootDir}\\Input\\Solutions.txt",
+                null,
+                null,
+                false, null, true));
+
+            Assert.That(configFilePath, Does.Not.Exist);
+            Assert.That(gitIgnoreFilePath, Does.Not.Exist);
+
+            Assert.That($"{expectedRelGitConfigPath} not found. The local build is expected to automatically create the {expectedRelGitConfigPath} file, which causes the git status to show it as a new file. Looks like {expectedRelGitConfigPath} was omitted explicitly from the commit. Please, include it.", Is.EqualTo(exc.Message));
+        }
+
+        [TestCaseSource(nameof(NewConfigFileTestCase))]
+        public void ForceAssertFailMismatchingBindingRedirectsInConfigFileWithGitIgnore(string projectFilePath, string _, bool _1, bool _2, string _3)
+        {
+            if (s_updateExpectedResults)
+            {
+                Assert.Ignore($"The test is irrelevant when updating the expected results.");
+                return;
+            }
+
+            var configFilePath = Path.GetFullPath($"{projectFilePath}\\..\\app.config");
+            var gitIgnoreFilePath = configFilePath + "\\..\\.gitignore";
+            Assert.That(configFilePath, Does.Not.Exist);
+            Assert.That(gitIgnoreFilePath, Does.Not.Exist);
+            File.Copy($"{configFilePath}\\..\\MismatchingApp.config", configFilePath);
+            File.WriteAllText(gitIgnoreFilePath, "app.config\r\n");
 
             var exc = Assert.Throws<ApplicationException>(() => Program.Run(
                 projectFilePath,
@@ -410,7 +542,32 @@ namespace Tests
                 null,
                 false, null, forceAssert: true));
 
-            Assert.That($"{configFilePath} does not have the expected set of binding redirects.", Is.EqualTo(exc.Message));
+            Assert.That($"{configFilePath.GetRelativeToGitWorkspaceRoot()} does not have the expected set of binding redirects.", Is.EqualTo(exc.Message));
+        }
+
+        [TestCaseSource(nameof(NewConfigFileTestCase))]
+        public void ForceAssertFailMismatchingBindingRedirectsInConfigFileNoGitIgnore(string projectFilePath, string _, bool _1, bool _2, string expectedRelGitConfigPath)
+        {
+            if (s_updateExpectedResults)
+            {
+                Assert.Ignore($"The test is irrelevant when updating the expected results.");
+                return;
+            }
+
+            var configFilePath = Path.GetFullPath($"{projectFilePath}\\..\\app.config");
+            var gitIgnoreFilePath = configFilePath + "\\..\\.gitignore";
+            Assert.That(configFilePath, Does.Not.Exist);
+            Assert.That(gitIgnoreFilePath, Does.Not.Exist);
+            File.Copy($"{configFilePath}\\..\\MismatchingApp.config", configFilePath);
+
+            var exc = Assert.Throws<ApplicationException>(() => Program.Run(
+                projectFilePath,
+                $"{GlobalContext.RootDir}\\Input\\Solutions.txt",
+                null,
+                null,
+                false, null, forceAssert: true));
+
+            Assert.That($"{expectedRelGitConfigPath} not found. The local build is expected to automatically create the {expectedRelGitConfigPath} file, which causes the git status to show it as a new file. Looks like {expectedRelGitConfigPath} was omitted explicitly from the commit. Please, include it.", Is.EqualTo(exc.Message));
         }
     }
 }

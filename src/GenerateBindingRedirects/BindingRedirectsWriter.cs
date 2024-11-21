@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
-using System.Xml.XPath;
 
 namespace GenerateBindingRedirects
 {
@@ -64,8 +63,7 @@ namespace GenerateBindingRedirects
                 }
             }
 
-            bool createGitIgnore = true;
-            if (!WriteConfigFile(bindingRedirects, IsInAssertMode) ||
+            if (!WriteConfigFile(bindingRedirects, assert, forceAssert) ||
                 actualAppConfigStatus == ActualAppConfigStatus.Normal ||
                 actualAppConfigStatus == ActualAppConfigStatus.FileNotFound)
             {
@@ -76,80 +74,47 @@ namespace GenerateBindingRedirects
             {
                 AddAppConfigToProjectFile(actualAppConfigStatus);
             }
+        }
 
-            bool IsInAssertMode()
+        private bool IsConfigFileTrackedByGit => GitVersionControl.Instance.IsTracked(ExpectedConfigFilePath);
+
+        private void UpdateOrAssertGitIgnore(bool assert)
+        {
+            var gitIgnoreFilePath = Path.GetFullPath(ExpectedConfigFilePath + "\\..\\.gitignore");
+            var verb = "create";
+            var actualStatus = "not found";
+            var expectedStatus = "a new file";
+            Action<string, string> updateAction = File.WriteAllText;
+            if (File.Exists(gitIgnoreFilePath))
             {
-                if (forceAssert)
+                var gitIgnoreLines = File.ReadAllLines(gitIgnoreFilePath);
+                if (gitIgnoreLines.Contains("app.config", C.IgnoreCase))
                 {
-                    return true;
+                    return;
                 }
 
-                if (!assert)
-                {
-                    if (createGitIgnore)
-                    {
-                        createGitIgnore = false;
-                        if (!File.Exists(ExpectedConfigFilePath))
-                        {
-                            UpdateGitIgnore();
-                        }
-                    }
-
-                    return false;
-                }
-
-                var res = IsTrackedByGit();
-                if (res)
-                {
-                    forceAssert = true;
-                }
-                else
-                {
-                    createGitIgnore = false;
-                    assert = false;
-                }
-                return forceAssert;
+                verb = "update";
+                actualStatus = "does not ignore app.config";
+                expectedStatus = "modified";
+                updateAction = File.AppendAllText;
             }
 
-            bool IsTrackedByGit()
+            if (assert)
             {
-                if (!File.Exists(ExpectedConfigFilePath))
+                var relGitIgnoreFilePath = gitIgnoreFilePath.GetRelativeToGitWorkspaceRoot();
+                if (relGitIgnoreFilePath == gitIgnoreFilePath)
                 {
-                    // Even if the file existed and was tracked in the past, if it was deleted let us consider it as untracked.
-                    return false;
+                    throw new ApplicationException($"{gitIgnoreFilePath} {actualStatus}. " +
+                        $"The local build is expected to automatically {verb} the {gitIgnoreFilePath} file.");
+
                 }
-                var wsPath = ProjectFilePath;
-                while (wsPath.Length > 3 && !Directory.Exists(wsPath + "\\.git"))
-                {
-                    wsPath = Path.GetDirectoryName(wsPath);
-                }
-                if (wsPath.Length <= 3)
-                {
-                    return true;
-                }
-                // Get the right file case, very important for git.
-                var filePath = Directory.GetFiles(Path.GetDirectoryName(ExpectedConfigFilePath), Path.GetFileName(ExpectedConfigFilePath))[0];
-                var repo = new Repository(wsPath);
-                var objectish = "HEAD:" + filePath[(wsPath.Length + 1)..].Replace('\\', '/');
-                return repo.Lookup(objectish, ObjectType.Blob) != null;
+
+                throw new ApplicationException($"{relGitIgnoreFilePath} {actualStatus}. " +
+                    $"The local build is expected to automatically {verb} the {relGitIgnoreFilePath} file, which causes the git status to show it as {expectedStatus}. " +
+                    $"Looks like {relGitIgnoreFilePath} was omitted explicitly from the commit. Please, include it.");
             }
 
-            void UpdateGitIgnore()
-            {
-                var gitIgnoreFilePath = ExpectedConfigFilePath + "\\..\\.gitignore";
-                if (File.Exists(gitIgnoreFilePath))
-                {
-                    var gitIgnoreLines = File.ReadAllLines(gitIgnoreFilePath);
-                    if (!gitIgnoreLines.Contains("app.config", C.IgnoreCase))
-                    {
-                        File.AppendAllText(gitIgnoreFilePath, "app.config\r\n");
-                    }
-                }
-                else
-                {
-                    File.WriteAllText(gitIgnoreFilePath, "app.config\r\n");
-                }
-            }
+            updateAction(gitIgnoreFilePath, "app.config\r\n");
         }
 
         private void AddAppConfigToProjectFile(ActualAppConfigStatus actualAppConfigStatus)
@@ -176,19 +141,49 @@ namespace GenerateBindingRedirects
             doc.Save(ProjectFilePath);
         }
 
-        private bool WriteConfigFile(string bindingRedirects, IsInAssertModeDelegate isInAssertMode)
+        private bool WriteConfigFile(string bindingRedirects, bool assert, bool forceAssert)
         {
+            bool updateGitIgnore = false;
+            bool assertGitIgnore = false;
+            bool failIfOnlyBindingsInConfig = false;
+            if (assert || forceAssert)
+            {
+                if (IsConfigFileTrackedByGit)
+                {
+                    forceAssert = true;
+                    failIfOnlyBindingsInConfig = true;
+                }
+                else
+                {
+                    assert = false;
+                    assertGitIgnore = true;
+                }
+            }
+            else
+            {
+                if (IsConfigFileTrackedByGit)
+                {
+                    failIfOnlyBindingsInConfig = true;
+                }
+                else
+                {
+                    updateGitIgnore = true;
+                }
+            }
+
             if (!File.Exists(ExpectedConfigFilePath))
             {
                 if (string.IsNullOrEmpty(bindingRedirects))
                 {
                     return false;
                 }
-                if (isInAssertMode())
+                if (forceAssert)
                 {
-                    throw new ApplicationException($"{ExpectedConfigFilePath} is expected to have some assembly binding redirects, but it does not exist.");
+                    var configPath = ExpectedConfigFilePath.GetRelativeToGitWorkspaceRoot();
+                    throw new ApplicationException($"{configPath} is expected to have some assembly binding redirects, but it does not exist.");
                 }
-                WriteNewConfigFile(bindingRedirects, isInAssertMode);
+                HandleGitIgnore(updateGitIgnore, assertGitIgnore);
+                WriteNewConfigFile(bindingRedirects);
                 return true;
             }
 
@@ -197,6 +192,17 @@ namespace GenerateBindingRedirects
                 PreserveWhitespace = true
             };
             doc.Load(ExpectedConfigFilePath);
+
+            if (failIfOnlyBindingsInConfig && IsOnlyBindingsInConfig(doc, out var isEmpty))
+            {
+                var configPath = ExpectedConfigFilePath.GetRelativeToGitWorkspaceRoot();
+                throw new ApplicationException($"{configPath} {(isEmpty ? "is empty" : "only contains binding redirects")}. Remove this file from the version control. " +
+                    $"Make sure to commit the .gitignore file instead. It is created or updated automatically by the local build, if that file does not exist or does not " +
+                    $"ignore app.config already.");
+            }
+
+            HandleGitIgnore(updateGitIgnore, assertGitIgnore);
+
             var nsmgr = new XmlNamespaceManager(doc.NameTable);
             nsmgr.AddNamespace("b", ASSEMBLY_BINDING_XMLNS);
             var assemblyBinding = doc.SelectSingleNode("/configuration/runtime/b:assemblyBinding", nsmgr);
@@ -206,19 +212,20 @@ namespace GenerateBindingRedirects
                 {
                     return false;
                 }
-                if (isInAssertMode())
+                if (forceAssert)
                 {
-                    throw new ApplicationException($"{ExpectedConfigFilePath} is expected to have some assembly binding redirects, but it has none.");
+                    var configPath = ExpectedConfigFilePath.GetRelativeToGitWorkspaceRoot();
+                    throw new ApplicationException($"{configPath} is expected to have some assembly binding redirects, but it has none.");
                 }
 
                 var cfg = doc.SelectSingleNode("/configuration");
                 if (cfg == null)
                 {
-                    WriteNewConfigFile(bindingRedirects, isInAssertMode);
+                    WriteNewConfigFile(bindingRedirects);
                     return true;
                 }
 
-                var runtime = cfg.ChildNodes.Cast<XmlNode>().FirstOrDefault(n => n.LocalName == "runtime");
+                XmlNode runtime = cfg.ChildNodes.OfType<XmlElement>().FirstOrDefault(n => n.LocalName == "runtime");
                 if (runtime == null)
                 {
                     cfg.AppendChild(doc.CreateWhitespace("  "));
@@ -226,7 +233,7 @@ namespace GenerateBindingRedirects
                     runtime.AppendChild(doc.CreateWhitespace(Environment.NewLine + "  "));
                     cfg.AppendChild(doc.CreateWhitespace(Environment.NewLine));
                 }
-                assemblyBinding = runtime.ChildNodes.Cast<XmlNode>().FirstOrDefault(n => n.LocalName == "assemblyBinding");
+                assemblyBinding = runtime.ChildNodes.OfType<XmlElement>().FirstOrDefault(n => n.LocalName == "assemblyBinding");
                 if (assemblyBinding == null)
                 {
                     runtime.AppendChild(doc.CreateWhitespace("  "));
@@ -245,13 +252,14 @@ namespace GenerateBindingRedirects
                 .Replace(@"<assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">", "")
                 .Replace(@"</assemblyBinding>", "");
 
-            if (isInAssertMode())
+            if (forceAssert)
             {
                 if (curInnerXml == newInnerXml)
                 {
                     return false;
                 }
-                throw new ApplicationException($"{ExpectedConfigFilePath} does not have the expected set of binding redirects.");
+                var configPath = ExpectedConfigFilePath.GetRelativeToGitWorkspaceRoot();
+                throw new ApplicationException($"{configPath} does not have the expected set of binding redirects.");
             }
 
             if (curInnerXml != newInnerXml)
@@ -264,17 +272,74 @@ namespace GenerateBindingRedirects
             return true;
         }
 
-        private void WriteNewConfigFile(string bindingRedirects, IsInAssertModeDelegate isInAssertMode)
+        private void HandleGitIgnore(bool updateGitIgnore, bool assertGitIgnore)
         {
-            if (bindingRedirects.Length == 0)
+            if (assertGitIgnore || updateGitIgnore)
             {
-                return;
+                UpdateOrAssertGitIgnore(assertGitIgnore);
             }
-            if (isInAssertMode())
+        }
+
+        private static string GetRelativeFilePath(string wsPath, string filePath)
+        {
+            if (wsPath != null &&
+                filePath.Length > wsPath.Length &&
+                (filePath[wsPath.Length] == '\\' || filePath[wsPath.Length] == '/') &&
+                filePath.StartsWith(wsPath, StringComparison.OrdinalIgnoreCase))
             {
-                throw new ApplicationException($"{ExpectedConfigFilePath} is expected to have some assembly binding redirects, but it is empty or does not exist.");
+                filePath = filePath[(wsPath.Length + 1)..];
             }
 
+            return filePath;
+        }
+
+        private static bool IsOnlyBindingsInConfig(XmlDocument doc, out bool isEmpty)
+        {
+            isEmpty = false;
+
+            var cfg = doc.SelectSingleNode("/configuration");
+            if (cfg == null)
+            {
+                isEmpty = true;
+                return true;
+            }
+
+            var childNodes = cfg.ChildNodes.OfType<XmlElement>().ToList();
+            if (childNodes.Count == 0)
+            {
+                isEmpty = true;
+                return true;
+            }
+            if (childNodes.Count > 1 || childNodes[0].LocalName != "runtime")
+            {
+                return false;
+            }
+
+            var runtime = childNodes[0];
+            childNodes = runtime.ChildNodes.OfType<XmlElement>().ToList();
+            if (childNodes.Count == 0)
+            {
+                isEmpty = true;
+                return true;
+            }
+            if (childNodes.Count > 1 || childNodes[0].LocalName != "assemblyBinding")
+            {
+                return false;
+            }
+
+            var assemblyBinding = childNodes[0];
+            childNodes = assemblyBinding.ChildNodes.OfType<XmlElement>().ToList();
+            if (childNodes.Count == 0)
+            {
+                isEmpty = true;
+                return true;
+            }
+
+            return childNodes.All(o => o.LocalName == "dependentAssembly");
+        }
+
+        private void WriteNewConfigFile(string bindingRedirects)
+        {
             const string newConfigFileFormat = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <runtime>
@@ -287,17 +352,6 @@ namespace GenerateBindingRedirects
             File.WriteAllText(ExpectedConfigFilePath, string.Format(newConfigFileFormat, bindingRedirects));
         }
 
-        private static (XPathNavigator, XmlNamespaceManager) GetProjectXPathNavigator(string projectFile)
-        {
-            var doc = new XPathDocument(projectFile);
-            var nav = doc.CreateNavigator();
-            var nsmgr = new XmlNamespaceManager(nav.NameTable);
-            nav.MoveToFollowing(XPathNodeType.Element);
-            var ns = nav.GetNamespacesInScope(XmlNamespaceScope.Local).FirstOrDefault();
-            var nsValue = ns.Value ?? "";
-            nsmgr.AddNamespace("p", nsValue);
-            return (nav, nsmgr);
-        }
         private static (XmlDocument, XmlNamespaceManager) GetProjectXmlDocument(string projectFile)
         {
             var doc = new XmlDocument

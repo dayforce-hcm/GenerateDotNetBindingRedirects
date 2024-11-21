@@ -16,4 +16,9 @@
     <ProjectReference Include="..\Dayforce.CSharp.ProjectAssets\Dayforce.CSharp.ProjectAssets.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
 </Project>

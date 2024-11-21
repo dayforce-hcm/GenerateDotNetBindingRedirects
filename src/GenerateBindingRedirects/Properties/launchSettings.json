@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "AnalyzeProjectAssets": {
+    "GenerateBindingRedirects": {
       "commandName": "Project",
       "commandLineArgs": "--projectFile C:\\Dayforce\\tip3\\Test\\DFAcceptanceUnitTest\\DFAcceptanceUnitTest.csproj --targetFiles C:\\Dayforce\\tip3\\Test\\DFAcceptanceUnitTest\\obj\\BindingRedirectTargetFiles.txt --solutions C:\\Dayforce\\tip3\\Build\\projects.yml --outDir C:\\Dayforce\\tip3\\bin.link\\ --writeBindingRedirects --usePrivateProbingPath --includeUnsigned ",
       "workingDirectory": "c:\\dayforce\\tip"

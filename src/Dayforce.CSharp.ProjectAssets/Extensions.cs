@@ -9,7 +9,7 @@ namespace Dayforce.CSharp.ProjectAssets
 {
     public static class Extensions
     {
-        public static readonly string[] ArrayWithEmptyLine = { "" };
+        public static readonly string[] ArrayWithEmptyLine = [""];
 
         public static void ForEach<T>(this IEnumerable<T> items, Action<T> action)
         {
@@ -80,6 +80,27 @@ namespace Dayforce.CSharp.ProjectAssets
                 Authors = nuSpecReader.GetAuthors(),
                 ProjectUrl = nuSpecReader.GetProjectUrl()
             };
+        }
+
+        public static string GetGitWorkspaceRoot(this string path)
+        {
+            string tmp;
+            path = Path.GetFullPath(path);
+            while (path.Length > 3 && !Directory.Exists(tmp = path + "\\.git") && !File.Exists(tmp))
+            {
+                path = Path.GetDirectoryName(path);
+            }
+            if (path.Length <= 3)
+            {
+                return null;
+            }
+            return path + '\\';
+        }
+
+        public static string GetRelativeToGitWorkspaceRoot(this string path)
+        {
+            var wsRoot = path.GetGitWorkspaceRoot();
+            return wsRoot == null ? path : path[wsRoot.Length..];
         }
     }
 }
