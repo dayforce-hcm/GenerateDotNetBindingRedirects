@@ -12,7 +12,7 @@ resources:
   - repository: templates
     type: git
     name: DFDevOps\cicd-templates
-    ref: stable-2-cov
+    ref: refs/tags/stable-2
     # https://dev.azure.com/Ceridian/DFDevOps/_git/cicd-templates
 
 jobs:
