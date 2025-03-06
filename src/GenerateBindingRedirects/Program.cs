@@ -49,7 +49,6 @@ namespace GenerateBindingRedirects
             var test = false;
             bool usePrivateProbingPath = false;
             string[] verboseTargets = null;
-            string nuGetUsageReport = null;
             bool allowNonexistingSolutions = false;
             bool forceAssert = false;
             bool dumpSolutionContext = false;
@@ -76,7 +75,6 @@ namespace GenerateBindingRedirects
                                     "The parameter behaves as --writeBindingRedirects (except it does not create .gitignore) otherwise AND if { the app.config file does not exist initially OR if it is not tracked by git }. " +
                                     "To force the assertion logic in all the cases use the flag --forceAssert.", _ => assert = true)
                 .Add("forceAssert", "Unconditionally asserts that the binding redirects are correct. Mutually exclusive with--writeBindingRedirects and --assert.", _ => forceAssert = true)
-                .Add("u|nuGetUsageReport=", "Generate a report listing all the nuget packages on which the given project depends and save it under the given file path.", v => nuGetUsageReport = v)
                 .Add("allowNonexistingSolutions", "Silently skip non existing solutions mentioned in the given solutions list file.", _ => allowNonexistingSolutions = true)
                 .Add("dumpSolutionContext", "Dumps the solution context as JSON and exits. Most of other command line arguments are silently ignored.", _ => dumpSolutionContext = true)
                 .Add("iu|includeUnsigned", "Instructs the tool to include binding redirects for unsigned dependencies. Considered only if --privateProbingPath is given.", _ => includeUnsigned = true)
@@ -150,8 +148,8 @@ namespace GenerateBindingRedirects
                 }
 
                 Run(projectFilePath, solutionsListFile, outputTargetFiles, outputBindingRedirects, writeBindingRedirects,
-                    outDir, assert, test, nuGetUsageReport, allowNonexistingSolutions, forceAssert, dumpSolutionContext,
-                    includeUnsigned, usePrivateProbingPath);
+                    outDir, assert, test, allowNonexistingSolutions, forceAssert, dumpSolutionContext, includeUnsigned,
+                    usePrivateProbingPath);
             }
             catch (ApplicationException exc)
             {
@@ -183,7 +181,6 @@ namespace GenerateBindingRedirects
             string outDir = null,
             bool assert = false,
             bool test = false,
-            string nuGetUsageReport = null,
             bool allowNonexistingSolutions = false,
             bool forceAssert = false,
             bool dumpSolutionContext = false,
@@ -218,10 +215,6 @@ namespace GenerateBindingRedirects
 
                 Log.WriteVerbose("{0} projects:", projects.Count());
                 projects.ForEach(p => Log.WriteVerbose("  {0}", p.Name));
-            }
-            if (nuGetUsageReport != null)
-            {
-                projectAssets.GenerateNuGetUsageReport(focus.ProjectName, nuGetUsageReport);
             }
 
             var dependents = GetDependents(projectAssets);
