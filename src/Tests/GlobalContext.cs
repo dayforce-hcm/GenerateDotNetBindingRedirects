@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Reflection;
+using Dayforce.CSharp.ProjectAssets;
 using NUnit.Framework;
 
 namespace Tests
@@ -17,7 +18,7 @@ namespace Tests
             {
                 if (s_outputDir == null)
                 {
-                    s_outputDir = Extensions.GetTempDirectoryName();
+                    s_outputDir = VerboseLog.DefaultLogDirectory + "\\temp";
                 }
                 return s_outputDir;
             }

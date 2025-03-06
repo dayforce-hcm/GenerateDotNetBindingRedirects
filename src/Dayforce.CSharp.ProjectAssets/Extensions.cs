@@ -9,6 +9,11 @@ namespace Dayforce.CSharp.ProjectAssets
 {
     public static class Extensions
     {
+        private static readonly JsonSerializerSettings s_jsonSerializerSettings = new()
+        {
+            DefaultValueHandling = DefaultValueHandling.Ignore
+        };
+
         public static readonly string[] ArrayWithEmptyLine = [""];
 
         public static void ForEach<T>(this IEnumerable<T> items, Action<T> action)
@@ -30,7 +35,7 @@ namespace Dayforce.CSharp.ProjectAssets
             }
             return -1;
         }
-    
+
         public static bool IsExecutable(this string path) => path.EndsWith(".dll", C.IGNORE_CASE) || path.EndsWith(".exe", C.IGNORE_CASE);
 
         public static void SaveAllText(this string text, string filePath)
@@ -52,34 +57,52 @@ namespace Dayforce.CSharp.ProjectAssets
 
         public static void SaveAllLines(this IEnumerable<string> lines, string filePath) => string.Join(Environment.NewLine, lines.Concat(ArrayWithEmptyLine)).SaveAllText(filePath);
 
-        public static void GenerateNuGetUsageReport(this ProjectAssets projectAssets, string projectName, string nuGetUsageReport)
+        public static void GenerateNuGetUsageReport(this ProjectAssets projectAssets, string projectName, string nuGetUsageReport, bool compat = false)
         {
             if (Directory.Exists(nuGetUsageReport) || nuGetUsageReport[^1] == '\\')
             {
                 nuGetUsageReport = nuGetUsageReport + (nuGetUsageReport[^1] == '\\' ? "" : "\\") + "NuGetUsageReport-" + projectName + ".json";
             }
-            JsonConvert.SerializeObject(projectAssets
+
+            var map = projectAssets
                 .Libraries
                 .Where(o => o.Value.Type == C.PACKAGE && o.Value.HasRuntimeAssemblies)
-                .ToDictionary(o => o.Key, o => new
+                .ToDictionary(o => o.Key, o =>
                 {
-                    NuGetVersion = o.Value.Version.ToString(),
-                    Metadata = GetMetadata(projectAssets.PackageFolders, o.Key, o.Value),
-                    RuntimeAssemblies = o.Value.Library.RuntimeAssemblies.Select(o => Path.GetFileName(o.Path))
-                }), Formatting.Indented).SaveAllText(nuGetUsageReport);
+                    string nuGetVersion = o.Value.Version.ToString();
+                    return new
+                    {
+                        NuGetVersion = nuGetVersion,
+                        Metadata = GetMetadata(projectAssets.PackageFolders, o.Key, nuGetVersion, compat),
+                        RuntimeAssemblies = o.Value.Library.RuntimeAssemblies.Select(o => Path.GetFileName(o.Path))
+                    };
+                });
+
+            JsonConvert.SerializeObject(compat ? map : new 
+            {
+                projectAssets.PackageFolders,
+                Packages = map
+            }, Formatting.Indented, s_jsonSerializerSettings).SaveAllText(nuGetUsageReport);
         }
 
-        private static object GetMetadata(List<string> packageFolders, string packageId, LibraryItem value)
+        private static object GetMetadata(List<string> packageFolders, string packageId, string nuGetVersion, bool compat)
         {
-            var nuSpecFile = packageFolders
-                .Select(packageFolder => Path.Combine(packageFolder, packageId, value.Version.ToString(), packageId + ".nuspec"))
-                .First(File.Exists);
-            var nuSpecReader = new NuspecReader(nuSpecFile);
-            return new
+            var nuSpecFileName = packageId + ".nuspec";
+            for (var i = 0; i < packageFolders.Count; ++i)
             {
-                Authors = nuSpecReader.GetAuthors(),
-                ProjectUrl = nuSpecReader.GetProjectUrl()
-            };
+                var nuSpecFile = Path.Combine(packageFolders[i], packageId, nuGetVersion, nuSpecFileName);
+                if (File.Exists(nuSpecFile))
+                {
+                    var nuSpecReader = new NuspecReader(nuSpecFile);
+                    return new
+                    {
+                        Authors = nuSpecReader.GetAuthors(),
+                        ProjectUrl = nuSpecReader.GetProjectUrl(),
+                        PackageFolderIndex = compat ? 0 : i,
+                    };
+                }
+            }
+            return null;
         }
 
         public static string GetGitWorkspaceRoot(this string path)

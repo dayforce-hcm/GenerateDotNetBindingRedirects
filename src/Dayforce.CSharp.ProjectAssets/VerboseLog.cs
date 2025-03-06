@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 
@@ -21,7 +20,7 @@ namespace Dayforce.CSharp.ProjectAssets
                 logDir = Environment.GetEnvironmentVariable("System_ArtifactsDirectory");
                 if (string.IsNullOrEmpty(logDir))
                 {
-                    logDir = $"{Path.GetTempPath()}\\a{Process.GetCurrentProcess().Id}_{DateTime.Now:yyyyMMddHHmmss}";
+                    logDir = $"{Path.GetTempPath()}a{Environment.ProcessId}_{DateTime.Now:yyyyMMddHHmmss}";
                     // May already exist if called twice from different scripts when ran locally
                     Directory.CreateDirectory(logDir);
                     return logDir;

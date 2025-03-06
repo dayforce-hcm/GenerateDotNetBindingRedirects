@@ -43,6 +43,7 @@ namespace Tests
                 GlobalContext.RootDir + "\\Input\\" + PROJECT_FILE_PATH,
                 "-u",
                 GlobalContext.OutputDir,
+                "--compat",
                 "-v:" + GlobalContext.OutputDir
             };
 
@@ -52,11 +53,19 @@ namespace Tests
             if (s_updateExpectedResults)
             {
                 Directory.CreateDirectory(expectedDir);
-                File.Move(GlobalContext.OutputDir + REPORT_FILE_NAME, expectedDir + REPORT_FILE_NAME, true);
+                File.Move(GlobalContext.OutputDir + '\\' + REPORT_FILE_NAME, expectedDir + REPORT_FILE_NAME, true);
             }
             else
             {
-                NUnit.Framework.Legacy.FileAssert.AreEqual(expectedDir + REPORT_FILE_NAME, GlobalContext.OutputDir + REPORT_FILE_NAME, "Report files do not match");
+                try
+                {
+                    NUnit.Framework.Legacy.FileAssert.AreEqual(expectedDir + REPORT_FILE_NAME, GlobalContext.OutputDir + '\\' + REPORT_FILE_NAME, "Report files do not match");
+                }
+                catch
+                {
+                    File.Move(GlobalContext.OutputDir + '\\' + REPORT_FILE_NAME, VerboseLog.DefaultLogDirectory + '\\' + REPORT_FILE_NAME);
+                    throw;
+                }
             }
             File.Move(Program.LogFilePath, expectedDir + "Verbose.log", true);
         }

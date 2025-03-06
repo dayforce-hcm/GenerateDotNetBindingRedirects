@@ -17,12 +17,14 @@ namespace GenerateNuGetUsageReport
             string solutionsListFile = null;
             var help = false;
             string nuGetUsageReport = null;
+            bool compat = false;
             var options = new OptionSet()
                 .Add("h|help|?", "Show help", _ => help = true)
                 .Add("v|verbose:", $"Produces verbose output. May be given a custom directory path where to collect extended information. Defaults to {logPath}", v => { logPath = v ?? logPath; verbose = true; })
                 .Add("f|projectFile=", "[Required] The project file.", v => projectFilePath = Path.GetFullPath(v))
                 .Add("s|solutions=", "[Required] A file listing all the relevant solutions.", v => solutionsListFile = v)
                 .Add("u|nuGetUsageReport=", "[Required] Generate a report listing all the nuget packages on which the given project depends and save it under the given file path.", v => nuGetUsageReport = v)
+                .Add("compat", "Compatibility mode.", _ => compat = true)
             ;
 
             var extraArgs = options.Parse(args);
@@ -99,7 +101,7 @@ namespace GenerateNuGetUsageReport
                     throw new ApplicationException($"No project.assets.json is associated with {projectFilePath} and {solutionsListFile}.");
                 }
 
-                projectAssets.GenerateNuGetUsageReport(focus.ProjectName, nuGetUsageReport);
+                projectAssets.GenerateNuGetUsageReport(focus.ProjectName, nuGetUsageReport, compat);
             }
             catch (ApplicationException exc)
             {

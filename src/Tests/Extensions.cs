@@ -4,23 +4,16 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 
 namespace Tests
 {
     public static class Extensions
     {
-        public static string GetTempDirectoryName()
-        {
-            var name = Path.GetTempFileName();
-            File.Delete(name);
-            return name + "\\";
-        }
-
         public static string GetMSBuildExe()
         {
             var drives = new[] { 'C', 'D', 'E', 'F' };
-            var flavours = new Dictionary<string, string> {
+            var flavours = new Dictionary<string, string>
+            {
                 ["BuildTools"] = "Program Files (x86)",
                 ["Enterprise"] = "Program Files",
                 ["Professional"] = "Program Files",
@@ -67,18 +60,16 @@ namespace Tests
 
         public static void RestoreNuGetPackages(this string msBuildExe, string slnFilePath)
         {
-            var file = Path.GetTempFileName();
+            var filePathWoutExt = @$"{VerboseLog.DefaultLogDirectory}\unit-tests-restore.{Path.GetFileNameWithoutExtension(slnFilePath)}";
+            var logFilePath = filePathWoutExt + ".log";
             string binLogArg = "";
             string systemDebug = Environment.GetEnvironmentVariable("SYSTEM_DEBUG");
             if (systemDebug != null && systemDebug.Equals("true", C.IGNORE_CASE))
             {
-                var binLogDir = Environment.GetEnvironmentVariable("BUILD_ARTIFACTSTAGINGDIRECTORY");
-                Assert.That(binLogDir, Is.Not.Null.Or.Empty);
-                binLogArg = $@" /bl:{binLogDir}\binlogs\unit-tests-restore.{Path.GetFileNameWithoutExtension(slnFilePath)}.binlog";
+                binLogArg = $@" /bl:{filePathWoutExt}.binlog";
             }
-            var exitCode = msBuildExe.RunProcess($"/t:Restore /v:m /m /nologo /noConsoleLogger {slnFilePath} /fl /p:NuGetAudit=false /p:NuGetInteractive=false{binLogArg} /flp:LogFile={file};Verbosity=minimal");
-            TestContext.Progress.WriteLine(File.ReadAllText(file));
-            File.Delete(file);
+            var exitCode = msBuildExe.RunProcess($"/t:Restore /v:m /m /nologo /noConsoleLogger {slnFilePath} /fl /p:NuGetAudit=false /p:NuGetInteractive=false{binLogArg} /flp:LogFile={logFilePath};Verbosity=minimal");
+            TestContext.Progress.WriteLine(File.ReadAllText(logFilePath));
             Assert.That(exitCode, Is.Zero);
         }
     }
