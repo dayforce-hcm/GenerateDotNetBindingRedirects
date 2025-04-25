@@ -20,7 +20,7 @@
 
     <PropertyGroup Condition="'$(GenerateBindingRedirectsForTest)' == True">
       <GenerateBindingRedirectsFlags>$(GenerateBindingRedirectsFlags) --usePrivateProbingPath</GenerateBindingRedirectsFlags>
-      <GenerateBindingRedirectsFlags Condition="'$(IsUnitTestProject)' == true">$(GenerateBindingRedirectsFlags) --includeUnsigned</GenerateBindingRedirectsFlags>
+      <GenerateBindingRedirectsFlags>$(GenerateBindingRedirectsFlags) --includeUnsigned</GenerateBindingRedirectsFlags>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(GenerateBindingRedirectsForTest)' != True">
