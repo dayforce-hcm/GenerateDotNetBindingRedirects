@@ -2,12 +2,12 @@
 using System;
 using System.IO;
 using System.Linq;
-using Dependents = System.Collections.Generic.SortedDictionary<string,
+using Dependencies = System.Collections.Generic.SortedDictionary<string,
     System.Collections.Generic.Dictionary<System.Version,
         System.Collections.Generic.Dictionary<Dayforce.CSharp.ProjectAssets.RuntimeAssembly,
             System.Collections.Generic.Dictionary<Dayforce.CSharp.ProjectAssets.NuGetDependency,
                 System.Collections.Generic.List<Dayforce.CSharp.ProjectAssets.LibraryItem>>>>>;
-using DependentsByVersion = System.Collections.Generic.Dictionary<System.Version,
+using DependenciesByVersion = System.Collections.Generic.Dictionary<System.Version,
         System.Collections.Generic.Dictionary<Dayforce.CSharp.ProjectAssets.RuntimeAssembly,
             System.Collections.Generic.Dictionary<Dayforce.CSharp.ProjectAssets.NuGetDependency,
                 System.Collections.Generic.List<Dayforce.CSharp.ProjectAssets.LibraryItem>>>>;
@@ -43,14 +43,14 @@ namespace GenerateBindingRedirects
             Dayforce.CSharp.ProjectAssets.Log.Instance = s_baseLog = NullLog.Default;
         }
 
-        public static void CuriousCases(Dependents dependents)
+        public static void CuriousCases(Dependencies dependencies)
         {
             if (!Verbose)
             {
                 return;
             }
 
-            foreach (var asmName in dependents.Where(o => o.Key != RuntimeAssembly.Unresolved.AssemblyName))
+            foreach (var asmName in dependencies.Where(o => o.Key != RuntimeAssembly.Unresolved.AssemblyName))
             {
                 foreach (var version in asmName.Value)
                 {
@@ -72,15 +72,15 @@ namespace GenerateBindingRedirects
             }
         }
 
-        public static void DependentsByVersion(string asmName, DependentsByVersion dependentsByVersion)
+        public static void DependenciesByVersion(string asmName, DependenciesByVersion dependenciesByVersion)
         {
             if (!Verbose)
             {
                 return;
             }
 
-            WriteVerbose("DependencyOf({0}) : {1} packages", asmName, dependentsByVersion.Values.SelectMany(a => a.Values.SelectMany(d => d.Values.SelectMany(l => l))).Count());
-            dependentsByVersion.ForEach(v =>
+            WriteVerbose("DependencyOf({0}) : {1} packages", asmName, dependenciesByVersion.Values.SelectMany(a => a.Values.SelectMany(d => d.Values.SelectMany(l => l))).Count());
+            dependenciesByVersion.ForEach(v =>
             {
                 WriteVerbose("DependencyOf({0}, Version = {1}) : {2} packages", asmName, v.Key, v.Value.Values.SelectMany(d => d.Values.SelectMany(l => l)).Count());
                 v.Value.ForEach(a =>

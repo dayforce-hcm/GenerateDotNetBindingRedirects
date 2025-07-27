@@ -12,12 +12,12 @@ using Newtonsoft.Json;
 using NuGet.Frameworks;
 using NuGet.ProjectModel;
 using NuGet.Versioning;
-using Dependents = System.Collections.Generic.SortedDictionary<string,
+using Dependencies = System.Collections.Generic.SortedDictionary<string,
     System.Collections.Generic.Dictionary<System.Version,
         System.Collections.Generic.Dictionary<Dayforce.CSharp.ProjectAssets.RuntimeAssembly,
             System.Collections.Generic.Dictionary<Dayforce.CSharp.ProjectAssets.NuGetDependency,
                 System.Collections.Generic.List<Dayforce.CSharp.ProjectAssets.LibraryItem>>>>>;
-using DependentsByVersion = System.Collections.Generic.Dictionary<System.Version,
+using DependenciesByVersion = System.Collections.Generic.Dictionary<System.Version,
         System.Collections.Generic.Dictionary<Dayforce.CSharp.ProjectAssets.RuntimeAssembly,
             System.Collections.Generic.Dictionary<Dayforce.CSharp.ProjectAssets.NuGetDependency,
                 System.Collections.Generic.List<Dayforce.CSharp.ProjectAssets.LibraryItem>>>>;
@@ -217,13 +217,13 @@ namespace GenerateBindingRedirects
                 projects.ForEach(p => Log.WriteVerbose("  {0}", p.Name));
             }
 
-            var dependents = GetDependents(projectAssets);
-            Log.CuriousCases(dependents);
+            var dependencies = GetDependencies(projectAssets);
+            Log.CuriousCases(dependencies);
 
             var frameworkRedistList = GetFrameworkRedistList(projectAssets.TargetFramework);
-            AddAssemblyReferencesForUnresolvedOrMismatchingNuGetDependencies(dependents, frameworkRedistList);
+            AddAssemblyReferencesForUnresolvedOrMismatchingNuGetDependencies(dependencies, frameworkRedistList);
 
-            var assemblyBindingRedirects = dependents
+            var assemblyBindingRedirects = dependencies
                 .Where(kvp => kvp.Value.Count > 1)
                 .Select(kvp => GetAssemblyBindingRedirect(kvp.Key, kvp.Value, frameworkRedistList))
                 .Where(o => o != null)
@@ -410,7 +410,7 @@ namespace GenerateBindingRedirects
             packages.ForEach(p => Log.WriteVerbose("  [{0}] = {1}", p.Name, p));
         }
 
-        private static void AddAssemblyReferencesForUnresolvedOrMismatchingNuGetDependencies(Dependents dependents, IReadOnlyDictionary<(string, Version), AssemblyBindingRedirect> frameworkRedistList)
+        private static void AddAssemblyReferencesForUnresolvedOrMismatchingNuGetDependencies(Dependencies dependencies, IReadOnlyDictionary<(string, Version), AssemblyBindingRedirect> frameworkRedistList)
         {
             // 1. Microsoft.AspNet.Web.Optimization.1.1.3 depends on WebGrease.1.5.2
             // 2. WebGrease.1.5.2 contains WebGrease.dll with the assembly version of 1.5.2.14234
@@ -418,21 +418,21 @@ namespace GenerateBindingRedirects
             // When NuGet packages lie we have no choice but examine the assemblies
             var assemblyReferences = new SortedDictionary<(string, Version), List<PackageItem>>();
 
-            foreach (var package in dependents.Values.SelectMany(v => v.Values.SelectMany(r => r.Values.SelectMany(d => d.Values.SelectMany(l => l).OfType<PackageItem>()))).Distinct())
+            foreach (var package in dependencies.Values.SelectMany(v => v.Values.SelectMany(r => r.Values.SelectMany(d => d.Values.SelectMany(l => l).OfType<PackageItem>()))).Distinct())
             {
                 foreach (var runtimeAssembly in package.RuntimeAssemblies)
                 {
                     var module = ModuleDefinition.ReadModule(runtimeAssembly.FilePath);
                     foreach (var asmRef in module.AssemblyReferences)
                     {
-                        if (!dependents.TryGetValue(asmRef.Name, out var dependentsByVersion))
+                        if (!dependencies.TryGetValue(asmRef.Name, out var dependenciesByVersion))
                         {
                             var extra = frameworkRedistList.ContainsKey((asmRef.Name, asmRef.Version)) ? "framework assembly" : "unknown";
                             Log.WriteVerbose("AssemblyReferenceOf({0}) : skip {1} ({2}) - not found ({3})", runtimeAssembly.RelativeFilePath, asmRef.Name, asmRef.Version, extra);
                             continue;
                         }
 
-                        if (dependentsByVersion.ContainsKey(asmRef.Version))
+                        if (dependenciesByVersion.ContainsKey(asmRef.Version))
                         {
                             Log.WriteVerbose("AssemblyReferenceOf({0}) : skip {1} ({2}) - version match", runtimeAssembly.RelativeFilePath, asmRef.Name, asmRef.Version);
                             continue;
@@ -453,8 +453,8 @@ namespace GenerateBindingRedirects
                 var (asmRefName, asmRefVersion) = o.Key;
                 foreach (var package in o.Value)
                 {
-                    var dependentsByVersion = dependents[asmRefName];
-                    dependentsByVersion[asmRefVersion] = new Dictionary<RuntimeAssembly, Dictionary<NuGetDependency, List<LibraryItem>>>
+                    var dependenciesByVersion = dependencies[asmRefName];
+                    dependenciesByVersion[asmRefVersion] = new Dictionary<RuntimeAssembly, Dictionary<NuGetDependency, List<LibraryItem>>>
                     {
                         [RuntimeAssembly.Unresolved] = new Dictionary<NuGetDependency, List<LibraryItem>>
                         {
@@ -464,12 +464,12 @@ namespace GenerateBindingRedirects
                 }
             }
 
-            dependents.Remove(RuntimeAssembly.Unresolved.AssemblyName);
+            dependencies.Remove(RuntimeAssembly.Unresolved.AssemblyName);
         }
 
-        private static Dependents GetDependents(ProjectAssets projectAssets)
+        private static Dependencies GetDependencies(ProjectAssets projectAssets)
         {
-            var dependents = new Dependents(C.IgnoreCase);
+            var dependencies = new Dependencies(C.IgnoreCase);
             foreach (var lib in projectAssets.Libraries.Values)
             {
                 foreach (var dep in lib.NuGetDependencies)
@@ -482,37 +482,37 @@ namespace GenerateBindingRedirects
                             continue;
                         }
 
-                        if (!dependents.TryGetValue(r.AssemblyName, out var asmVersions))
+                        if (!dependencies.TryGetValue(r.AssemblyName, out var asmVersions))
                         {
-                            dependents[r.AssemblyName] = asmVersions = new DependentsByVersion();
+                            dependencies[r.AssemblyName] = asmVersions = new DependenciesByVersion();
                         }
                         if (!asmVersions.TryGetValue(r.AssemblyVersion, out var runtimeAssemblies))
                         {
                             asmVersions[r.AssemblyVersion] = runtimeAssemblies = new Dictionary<RuntimeAssembly, Dictionary<NuGetDependency, List<LibraryItem>>>();
                         }
-                        if (!runtimeAssemblies.TryGetValue(r, out var dependencies))
+                        if (!runtimeAssemblies.TryGetValue(r, out var dependents))
                         {
-                            runtimeAssemblies[r] = dependencies = new Dictionary<NuGetDependency, List<LibraryItem>>();
+                            runtimeAssemblies[r] = dependents = new Dictionary<NuGetDependency, List<LibraryItem>>();
                         }
-                        if (!dependencies.TryGetValue(dep, out var libraries))
+                        if (!dependents.TryGetValue(dep, out var libraries))
                         {
-                            dependencies[dep] = libraries = new List<LibraryItem>();
+                            dependents[dep] = libraries = new List<LibraryItem>();
                         }
                         libraries.Add(lib);
                     }
                 }
             }
 
-            return dependents;
+            return dependencies;
         }
 
-        public static AssemblyBindingRedirect GetAssemblyBindingRedirect(string asmName, DependentsByVersion dependentsByVersion,
+        public static AssemblyBindingRedirect GetAssemblyBindingRedirect(string asmName, DependenciesByVersion dependenciesByVersion,
             IReadOnlyDictionary<(string, Version), AssemblyBindingRedirect> frameworkRedistList)
         {
-            Log.DependentsByVersion(asmName, dependentsByVersion);
+            Log.DependenciesByVersion(asmName, dependenciesByVersion);
 
-            var maxAsmVersion = dependentsByVersion.Keys.Max();
-            var runtimeAssemblies = dependentsByVersion[maxAsmVersion];
+            var maxAsmVersion = dependenciesByVersion.Keys.Max();
+            var runtimeAssemblies = dependenciesByVersion[maxAsmVersion];
             var found = runtimeAssemblies.First();
             if (runtimeAssemblies.Count > 1)
             {
