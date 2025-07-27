@@ -20,15 +20,10 @@ namespace Dayforce.CSharp.ProjectAssets
                 logDir = Environment.GetEnvironmentVariable("System_ArtifactsDirectory");
                 if (string.IsNullOrEmpty(logDir))
                 {
-                    logDir = $"{Path.GetTempPath()}a{Environment.ProcessId}_{DateTime.Now:yyyyMMddHHmmss}";
-                    // May already exist if called twice from different scripts when ran locally
-                    Directory.CreateDirectory(logDir);
-                    return logDir;
+                    return $"{Path.GetTempPath()}a{Environment.ProcessId}_{DateTime.Now:yyyyMMddHHmmss}";
                 }
             }
-            logDir += "\\drop";
-            Directory.CreateDirectory(logDir);
-            return logDir;
+            return logDir + "\\drop";
         }
 
         public VerboseLog(string appName, string logFolder, string baseDir, string projectFilePath, bool zip)
