@@ -6,7 +6,7 @@ namespace Dayforce.CSharp.ProjectAssets
 {
     public class RuntimeAssembly : IEquatable<RuntimeAssembly>
     {
-        public static readonly RuntimeAssembly Unresolved = new RuntimeAssembly();
+        public static readonly RuntimeAssembly Unresolved = new();
 
         public readonly string RelativeFilePath;
         [JsonIgnore]

@@ -51,7 +51,7 @@ namespace Dayforce.CSharp.ProjectAssets
                     .Where(o => o != "System" &&
                         !o.StartsWith("System.") &&
                         !o.StartsWith("Microsoft.") &&
-                        !o.Contains(","))
+                        !o.Contains(','))
                     .Select(o => o.IsExecutable() ? o[0..^4] : o)
                     .ToList();
 
@@ -114,7 +114,7 @@ namespace Dayforce.CSharp.ProjectAssets
 
             Log.Instance.WriteVerbose("ProjectContext({0}) : {1}", RelativeProjectFilePath, AssemblyName);
 
-            m_referencedProjects = new Lazy<IReadOnlyList<ProjectContext>>(() => m_referencedProjectNames.Select(projectName => m_sc.GetProjectByName(Solution, projectName)).ToList());
+            m_referencedProjects = new Lazy<IReadOnlyList<ProjectContext>>(() => [.. m_referencedProjectNames.Select(projectName => m_sc.GetProjectByName(Solution, projectName))]);
         }
 
         public override string ToString() => $"{AssemblyName} ({ProjectName} @ {RelativeSolutionFilePath})";

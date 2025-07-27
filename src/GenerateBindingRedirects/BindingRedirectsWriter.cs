@@ -1,5 +1,4 @@
 ﻿using Dayforce.CSharp.ProjectAssets;
-using LibGit2Sharp;
 using System;
 using System.IO;
 using System.Linq;
@@ -8,7 +7,7 @@ using System.Xml;
 
 namespace GenerateBindingRedirects
 {
-    public class BindingRedirectsWriter
+    public class BindingRedirectsWriter(ProjectContext pc)
     {
         [Flags]
         private enum ActualAppConfigStatus
@@ -22,20 +21,15 @@ namespace GenerateBindingRedirects
         private delegate bool IsInAssertModeDelegate();
 
         private const string ASSEMBLY_BINDING_XMLNS = "urn:schemas-microsoft-com:asm.v1";
-        private static readonly XmlWriterSettings s_xmlWriterSettings = new XmlWriterSettings
+        private static readonly XmlWriterSettings s_xmlWriterSettings = new()
         {
             Encoding = new UTF8Encoding(false)
         };
 
-        private readonly ProjectContext m_pc;
+        private readonly ProjectContext m_pc = pc;
         private string ExpectedConfigFilePath => m_pc.ExpectedConfigFilePath;
         private string ActualConfigFilePath => m_pc.ActualConfigFilePath;
         private string ProjectFilePath => m_pc.ProjectFilePath;
-
-        public BindingRedirectsWriter(ProjectContext pc)
-        {
-            m_pc = pc;
-        }
 
         public void WriteBindingRedirects(string bindingRedirects, bool assert, bool forceAssert)
         {
@@ -316,7 +310,7 @@ namespace GenerateBindingRedirects
             }
 
             var runtime = childNodes[0];
-            childNodes = runtime.ChildNodes.OfType<XmlElement>().ToList();
+            childNodes = [.. runtime.ChildNodes.OfType<XmlElement>()];
             if (childNodes.Count == 0)
             {
                 isEmpty = true;
@@ -328,7 +322,7 @@ namespace GenerateBindingRedirects
             }
 
             var assemblyBinding = childNodes[0];
-            childNodes = assemblyBinding.ChildNodes.OfType<XmlElement>().ToList();
+            childNodes = [.. assemblyBinding.ChildNodes.OfType<XmlElement>()];
             if (childNodes.Count == 0)
             {
                 isEmpty = true;

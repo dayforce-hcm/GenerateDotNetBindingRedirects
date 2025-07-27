@@ -8,11 +8,11 @@ using NuGet.Versioning;
 
 namespace Dayforce.CSharp.ProjectAssets
 {
-    public class NuGetDependency : IEquatable<NuGetDependency>
+    public class NuGetDependency(PackageDependency prototype, IReadOnlyList<RuntimeAssembly> runtimeAssemblyItems) : IEquatable<NuGetDependency>
     {
         [JsonIgnore]
-        private readonly PackageDependency m_prototype;
-        public readonly IReadOnlyList<RuntimeAssembly> RuntimeAssemblyItems;
+        private readonly PackageDependency m_prototype = prototype;
+        public readonly IReadOnlyList<RuntimeAssembly> RuntimeAssemblyItems = runtimeAssemblyItems;
 
         public static NuGetDependency Create(LibraryItem owner, PackageDependency prototype, IReadOnlyList<RuntimeAssembly> runtimeAssemblyItems)
         {
@@ -36,12 +36,6 @@ namespace Dayforce.CSharp.ProjectAssets
                 return null;
             }
             return Create(owner, prototype, runtimeAssemblyItems);
-        }
-
-        public NuGetDependency(PackageDependency prototype, IReadOnlyList<RuntimeAssembly> runtimeAssemblyItems)
-        {
-            m_prototype = prototype;
-            RuntimeAssemblyItems = runtimeAssemblyItems;
         }
 
         public string Id => m_prototype.Id;

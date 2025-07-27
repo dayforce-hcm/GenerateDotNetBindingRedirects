@@ -6,10 +6,10 @@ using System.Text.RegularExpressions;
 
 namespace GenerateNuGetUsageReport
 {
-    public class SimpleSolutionsListFileReader : ISolutionsListFileReader
+    public partial class SimpleSolutionsListFileReader : ISolutionsListFileReader
     {
         private const string PATTERN = @"[\w\.\\/-]+\.sln";
-        private static readonly Regex s_regex = new Regex(PATTERN);
+        private static readonly Regex s_regex = MyRegex();
 
         public IEnumerable<string> YieldSolutionFilePaths(string slnListFilePath) => File
             .ReadAllLines(slnListFilePath)
@@ -17,5 +17,7 @@ namespace GenerateNuGetUsageReport
             .Select(line => s_regex.Match(line))
             .Where(m => m.Success)
             .Select(m => Path.GetFullPath(slnListFilePath + "\\..\\" + m.Value));
+        [GeneratedRegex(PATTERN)]
+        private static partial Regex MyRegex();
     }
 }

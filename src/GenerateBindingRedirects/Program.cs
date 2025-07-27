@@ -45,7 +45,7 @@ namespace GenerateBindingRedirects
             var debugMode = DebugMode.None;
             var verbose = false;
             string logPath = VerboseLog.DefaultLogDirectory;
-            List<string> extraArgs = new List<string>();
+            List<string> extraArgs = [];
             var test = false;
             bool usePrivateProbingPath = false;
             string[] verboseTargets = null;
@@ -384,7 +384,7 @@ namespace GenerateBindingRedirects
             {
                 if (extraArgs.Count == 0 ||
                     projectFilePath == null ||
-                    extraArgs.Any(keyword => projectFilePath.IndexOf(keyword, C.IGNORE_CASE) >= 0))
+                    extraArgs.Any(keyword => projectFilePath.Contains(keyword, C.IGNORE_CASE)))
                 {
                     switch (debugMode)
                     {
@@ -441,7 +441,7 @@ namespace GenerateBindingRedirects
                         Log.WriteVerbose("AssemblyReferenceOf({0}) : add {1} ({2})", runtimeAssembly.RelativeFilePath, asmRef.Name, asmRef.Version);
                         if (!assemblyReferences.TryGetValue((asmRef.Name, asmRef.Version), out var packages))
                         {
-                            assemblyReferences[(asmRef.Name, asmRef.Version)] = packages = new List<PackageItem>();
+                            assemblyReferences[(asmRef.Name, asmRef.Version)] = packages = [];
                         }
                         packages.Add(package);
                     }
@@ -458,7 +458,7 @@ namespace GenerateBindingRedirects
                     {
                         [RuntimeAssembly.Unresolved] = new Dictionary<NuGetDependency, List<LibraryItem>>
                         {
-                            [LibraryItem.UnresolvedNuGetDependency] = new List<LibraryItem> { package }
+                            [LibraryItem.UnresolvedNuGetDependency] = [package]
                         }
                     };
                 }
@@ -484,19 +484,19 @@ namespace GenerateBindingRedirects
 
                         if (!dependencies.TryGetValue(r.AssemblyName, out var asmVersions))
                         {
-                            dependencies[r.AssemblyName] = asmVersions = new DependenciesByVersion();
+                            dependencies[r.AssemblyName] = asmVersions = [];
                         }
                         if (!asmVersions.TryGetValue(r.AssemblyVersion, out var runtimeAssemblies))
                         {
-                            asmVersions[r.AssemblyVersion] = runtimeAssemblies = new Dictionary<RuntimeAssembly, Dictionary<NuGetDependency, List<LibraryItem>>>();
+                            asmVersions[r.AssemblyVersion] = runtimeAssemblies = [];
                         }
                         if (!runtimeAssemblies.TryGetValue(r, out var dependents))
                         {
-                            runtimeAssemblies[r] = dependents = new Dictionary<NuGetDependency, List<LibraryItem>>();
+                            runtimeAssemblies[r] = dependents = [];
                         }
                         if (!dependents.TryGetValue(dep, out var libraries))
                         {
-                            dependents[dep] = libraries = new List<LibraryItem>();
+                            dependents[dep] = libraries = [];
                         }
                         libraries.Add(lib);
                     }
@@ -557,10 +557,7 @@ namespace GenerateBindingRedirects
             {
                 if (predicate(kvp))
                 {
-                    if (remove == null)
-                    {
-                        remove = new List<K>();
-                    }
+                    remove ??= [];
                     remove.Add(kvp.Key);
                 }
             }

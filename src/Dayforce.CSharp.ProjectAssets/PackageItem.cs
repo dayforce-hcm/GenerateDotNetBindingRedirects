@@ -28,7 +28,7 @@ namespace Dayforce.CSharp.ProjectAssets
             VersionRange = versionRange;
 
             var baseDirs = packageFolders.Select(packageFolder => $"{packageFolder}{Name}\\{Version}\\").ToList();
-            RuntimeAssemblies = Library.RuntimeAssemblies
+            RuntimeAssemblies = [.. Library.RuntimeAssemblies
                 .Where(o => o.Path.IsExecutable())
                 .Select(o =>
                 {
@@ -40,12 +40,10 @@ namespace Dayforce.CSharp.ProjectAssets
                     var packageFolder = packageFolders.First(filePath.StartsWith);
                     return new RuntimeAssembly(packageFolder, filePath);
                 })
-                .OrderBy(o => o.RelativeFilePath)
-                .ToList();
-            RuntimeTargets = Library.RuntimeTargets
+                .OrderBy(o => o.RelativeFilePath)];
+            RuntimeTargets = [.. Library.RuntimeTargets
                 .Select(o => baseDirs.Select(baseDir => baseDir + o.Path).FirstOrDefault(File.Exists))
-                .Where(filePath => filePath != null)
-                .ToList();
+                .Where(filePath => filePath != null)];
         }
 
         public override void CompleteConstruction(List<string> packageFolders, NuGetFramework framework, SolutionsContext sc,

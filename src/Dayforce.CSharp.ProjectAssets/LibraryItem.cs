@@ -10,13 +10,13 @@ using NuGet.Versioning;
 
 namespace Dayforce.CSharp.ProjectAssets
 {
-    public abstract class LibraryItem
+    public abstract class LibraryItem(LockFileTargetLibrary library)
     {
-        private static readonly IReadOnlyList<RuntimeAssembly> s_unresolvedRuntimeAssemblies = new[] { RuntimeAssembly.Unresolved };
-        public static readonly NuGetDependency UnresolvedNuGetDependency = new NuGetDependency(new PackageDependency(RuntimeAssembly.Unresolved.AssemblyName), s_unresolvedRuntimeAssemblies);
+        private static readonly IReadOnlyList<RuntimeAssembly> s_unresolvedRuntimeAssemblies = [RuntimeAssembly.Unresolved];
+        public static readonly NuGetDependency UnresolvedNuGetDependency = new(new PackageDependency(RuntimeAssembly.Unresolved.AssemblyName), s_unresolvedRuntimeAssemblies);
 
         [JsonIgnore]
-        public readonly LockFileTargetLibrary Library;
+        public readonly LockFileTargetLibrary Library = library;
         [JsonIgnore]
         public string Name => Library.Name;
         public string Type => Library.Type;
@@ -35,12 +35,7 @@ namespace Dayforce.CSharp.ProjectAssets
         public abstract bool HasRuntimeTargets { get; }
 
         public static LibraryItem Create(LockFileTargetLibrary library, VersionRange versionRange, List<string> packageFolders) =>
-            library.Type == C.PACKAGE ? new PackageItem(library, versionRange, packageFolders) : (LibraryItem)new ProjectItem(library);
-
-        protected LibraryItem(LockFileTargetLibrary library)
-        {
-            Library = library;
-        }
+            library.Type == C.PACKAGE ? new PackageItem(library, versionRange, packageFolders) : new ProjectItem(library);
 
         public abstract void CompleteConstruction(List<string> packageFolders, NuGetFramework framework, SolutionsContext sc,
             HashSet<string> specialVersions, IReadOnlyDictionary<string, LibraryItem> all,
@@ -56,11 +51,10 @@ namespace Dayforce.CSharp.ProjectAssets
             {
                 deps = deps.Where(predicate);
             }
-            NuGetDependencies = deps
+            NuGetDependencies = [.. deps
                 .Select(dep => CreateNuGetDependency(dep, packageFolders, framework, specialVersions, all, discarded))
                 .Where(o => o != null)
-                .OrderBy(o => o.Id)
-                .ToList();
+                .OrderBy(o => o.Id)];
         }
 
         protected NuGetDependency CreateNuGetDependency(PackageDependency dep, List<string> packageFolders, NuGetFramework framework,

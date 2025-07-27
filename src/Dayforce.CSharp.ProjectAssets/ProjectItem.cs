@@ -6,16 +6,12 @@ using NuGet.Versioning;
 
 namespace Dayforce.CSharp.ProjectAssets
 {
-    public class ProjectItem : LibraryItem
+    public class ProjectItem(LockFileTargetLibrary library) : LibraryItem(library)
     {
         [JsonIgnore]
         public override bool HasRuntimeAssemblies => true;
         [JsonIgnore]
         public override bool HasRuntimeTargets => true;
-
-        public ProjectItem(LockFileTargetLibrary library) : base(library)
-        {
-        }
 
         public override void CompleteConstruction(List<string> packageFolders, NuGetFramework framework, SolutionsContext sc,
             HashSet<string> specialVersions, IReadOnlyDictionary<string, LibraryItem> all,

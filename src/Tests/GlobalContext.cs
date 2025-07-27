@@ -16,10 +16,7 @@ namespace Tests
         {
             get
             {
-                if (s_outputDir == null)
-                {
-                    s_outputDir = VerboseLog.DefaultLogDirectory + "\\temp";
-                }
+                s_outputDir ??= VerboseLog.DefaultLogDirectory + "\\temp";
                 return s_outputDir;
             }
         }

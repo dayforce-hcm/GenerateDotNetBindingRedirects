@@ -3,17 +3,11 @@ using NuGet.Frameworks;
 
 namespace Dayforce.CSharp.ProjectAssets
 {
-    public class FrameworkFromLibFolderPath : IFrameworkSpecific
+    public class FrameworkFromLibFolderPath(string libFolderPath) : IFrameworkSpecific
     {
-        public FrameworkFromLibFolderPath(string libFolderPath)
-        {
-            LibFolderPath = libFolderPath;
-            TargetFramework = NuGetFramework.ParseFolder(Path.GetFileName(libFolderPath));
-        }
+        public readonly string LibFolderPath = libFolderPath;
 
-        public readonly string LibFolderPath;
-
-        public NuGetFramework TargetFramework { get; }
+        public NuGetFramework TargetFramework { get; } = NuGetFramework.ParseFolder(Path.GetFileName(libFolderPath));
 
         public override string ToString() => TargetFramework.ToString();
     }
