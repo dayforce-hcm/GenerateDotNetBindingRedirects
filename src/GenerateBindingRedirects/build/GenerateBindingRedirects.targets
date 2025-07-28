@@ -8,6 +8,7 @@
       <SolutionsListFilePath Condition="Exists('$(WorkspaceRoot)DayforceSolutions.txt')">$(WorkspaceRoot)DayforceSolutions.txt</SolutionsListFilePath>
       <SolutionsListFilePath Condition="!Exists('$(WorkspaceRoot)DayforceSolutions.txt')">$(WorkspaceRoot)Build\projects.yml</SolutionsListFilePath>
       <BindingRedirectTargetFilesPath>$(BaseIntermediateOutputPath)BindingRedirectTargetFiles.txt</BindingRedirectTargetFilesPath>
+      <VulnerableNonConflictingDependenciesPath>$(BaseIntermediateOutputPath)BindingRedirectTargetFiles-VulnerableNonConflicting.txt</VulnerableNonConflictingDependenciesPath>
       <EffectiveOutDir Condition="'$(WebProjectOutputDir)' != ''">$(WebProjectOutputDir)\bin\</EffectiveOutDir>
       <EffectiveOutDir Condition="'$(WebProjectOutputDir)' == ''">$(OutDir)</EffectiveOutDir>
       <GenerateBindingRedirectsFlags>--projectFile $(MSBuildProjectFullPath)</GenerateBindingRedirectsFlags>
@@ -33,6 +34,7 @@
     
     <PropertyGroup>
       <_CopyBindingRedirectTargetFiles Condition="Exists('$(BindingRedirectTargetFilesPath)') And '$(GenerateBindingRedirectsForTest)' != True">True</_CopyBindingRedirectTargetFiles>
+      <_CopyVulnerableNonConflictingDependencies Condition="Exists('$(VulnerableNonConflictingDependenciesPath)') And '$(GenerateBindingRedirectsForTest)' != True">True</_CopyVulnerableNonConflictingDependencies>
       <ReplaceAppConfig Condition="'$(WebProjectOutputDir)' == '' And '$(AppConfig)' != 'app.config' And Exists('$(BindingRedirectTargetFilesPath)') And Exists('app.config')">True</ReplaceAppConfig>
     </PropertyGroup>
     <PropertyGroup Condition="'$(ReplaceAppConfig)' == True">
@@ -53,5 +55,19 @@
       <Output TaskParameter="Lines" ItemName="BindingRedirectTargetFile" />
     </ReadLinesFromFile>
     <Copy SourceFiles="@(BindingRedirectTargetFile)" DestinationFolder="$(EffectiveOutDir)" Retries="$(CopyRetryCount)" SkipUnchangedFiles="True" />
+  </Target>
+  
+  <Target Name="CopyVulnerableNonConflictingDependencies"
+          BeforeTargets="MvcBuildViews;AfterBuild;RunNUnit"
+          Condition="'$(_CopyVulnerableNonConflictingDependencies)' == True">
+    <ReadLinesFromFile File="$(VulnerableNonConflictingDependenciesPath)">
+      <Output TaskParameter="Lines" ItemName="VulnerableNonConflictingDependency" />
+    </ReadLinesFromFile>
+    <!-- Do not introduce new dlls, only overwrite if already exists and different -->
+    <Copy SourceFiles="@(VulnerableNonConflictingDependency)"
+          DestinationFolder="$(EffectiveOutDir)"
+          Retries="$(CopyRetryCount)"
+          SkipUnchangedFiles="True"
+          Condition="Exists('$(EffectiveOutDir)%(FileName)%(Extension)')" />
   </Target>
 </Project>

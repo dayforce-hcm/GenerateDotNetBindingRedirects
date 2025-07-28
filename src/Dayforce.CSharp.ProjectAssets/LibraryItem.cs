@@ -10,7 +10,7 @@ using NuGet.Versioning;
 
 namespace Dayforce.CSharp.ProjectAssets
 {
-    public abstract class LibraryItem(LockFileTargetLibrary library)
+    public abstract class LibraryItem(LockFileTargetLibrary library, string solution)
     {
         private static readonly IReadOnlyList<RuntimeAssembly> s_unresolvedRuntimeAssemblies = [RuntimeAssembly.Unresolved];
         public static readonly NuGetDependency UnresolvedNuGetDependency = new(new PackageDependency(RuntimeAssembly.Unresolved.AssemblyName), s_unresolvedRuntimeAssemblies);
@@ -20,6 +20,7 @@ namespace Dayforce.CSharp.ProjectAssets
         [JsonIgnore]
         public string Name => Library.Name;
         public string Type => Library.Type;
+        public string Solution { get; } = solution;
         [JsonIgnore]
         public NuGetVersion Version => Library.Version;
         [JsonIgnore]
@@ -34,8 +35,8 @@ namespace Dayforce.CSharp.ProjectAssets
         [JsonIgnore]
         public abstract bool HasRuntimeTargets { get; }
 
-        public static LibraryItem Create(LockFileTargetLibrary library, VersionRange versionRange, List<string> packageFolders) =>
-            library.Type == C.PACKAGE ? new PackageItem(library, versionRange, packageFolders) : new ProjectItem(library);
+        public static LibraryItem Create(LockFileTargetLibrary library, VersionRange versionRange, List<string> packageFolders, string solution) =>
+            library.Type == C.PACKAGE ? new PackageItem(library, versionRange, packageFolders, solution) : new ProjectItem(library, solution);
 
         public abstract void CompleteConstruction(List<string> packageFolders, NuGetFramework framework, SolutionsContext sc,
             HashSet<string> specialVersions, IReadOnlyDictionary<string, LibraryItem> all,

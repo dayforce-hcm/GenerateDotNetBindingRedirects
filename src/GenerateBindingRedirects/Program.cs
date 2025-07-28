@@ -252,6 +252,22 @@ namespace GenerateBindingRedirects
                 else
                 {
                     targetFiles.SaveAllLines(outputTargetFiles);
+
+                    var vulnerableNonConflictingTargetFiles = outputTargetFiles.Replace(".txt", "-VulnerableNonConflicting.txt");
+                    var nonConflicts = dependencies
+                        .Where(kvp => kvp.Value.Count == 1)
+                        .Select(kvp => GetVulnerableNonConflictingDependencyPath(focus.Solution, kvp.Value))
+                        .Where(o => o != null)
+                        .ToList();
+                    Log.WriteVerbose("Total of {0} vulnerable non-conflicting dependencies", nonConflicts.Count);
+                    if (nonConflicts.Count > 0)
+                    {
+                        nonConflicts.SaveAllLines(vulnerableNonConflictingTargetFiles);
+                    }
+                    else if (File.Exists(vulnerableNonConflictingTargetFiles))
+                    {
+                        File.Delete(vulnerableNonConflictingTargetFiles);
+                    }
                 }
             }
 
@@ -544,6 +560,38 @@ namespace GenerateBindingRedirects
             res = new AssemblyBindingRedirect(found.Key.FilePath);
             Log.WriteVerbose("NewAssemblyBindingRedirect : {0} - {1}", found.Key.FilePath, res);
             return res;
+        }
+
+        public static string GetVulnerableNonConflictingDependencyPath(string solution, DependenciesByVersion dependenciesByVersion)
+        {
+            if (dependenciesByVersion.SelectMany(o => o.Value).SelectMany(o => o.Value).SelectMany(o => o.Value).Any(o => o.Solution == solution))
+            {
+                return null;
+            }
+            var maxAsmVersion = dependenciesByVersion.Keys.Max();
+            var runtimeAssemblies = dependenciesByVersion[maxAsmVersion];
+            var found = runtimeAssemblies.First();
+            if (runtimeAssemblies.Count > 1)
+            {
+                var maxNuGetVersion = GetMaxNuGetVersion(found.Value);
+                foreach (var r in runtimeAssemblies.Skip(1))
+                {
+                    var other = GetMaxNuGetVersion(r.Value);
+                    if (other > maxNuGetVersion)
+                    {
+                        found = r;
+                        maxNuGetVersion = other;
+                    }
+                }
+            }
+
+            if (found.Key.FilePath == RuntimeAssembly.Unresolved.FilePath)
+            {
+                return null;
+            }
+
+            Log.WriteVerbose("NewVulnerableNonConflictingDependency : {0}", found.Key.FilePath);
+            return found.Key.FilePath;
         }
 
         private static NuGetVersion GetMaxNuGetVersion(Dictionary<NuGetDependency, List<LibraryItem>> value) => value.Keys.Select(o => o.VersionRange.MinVersion).Max();

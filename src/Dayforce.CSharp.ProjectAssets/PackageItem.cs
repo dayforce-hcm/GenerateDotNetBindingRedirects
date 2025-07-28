@@ -23,7 +23,7 @@ namespace Dayforce.CSharp.ProjectAssets
 
         public bool ShouldSerializeRuntimeAssemblies() => RuntimeAssemblies.Count > 0;
 
-        public PackageItem(LockFileTargetLibrary library, VersionRange versionRange, List<string> packageFolders) : base(library)
+        public PackageItem(LockFileTargetLibrary library, VersionRange versionRange, List<string> packageFolders, string solution) : base(library, solution)
         {
             VersionRange = versionRange;
 

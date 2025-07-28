@@ -2,7 +2,7 @@
   "profiles": {
     "GenerateBindingRedirects": {
       "commandName": "Project",
-      "commandLineArgs": "--projectFile C:\\Dayforce\\tip3\\Test\\DFAcceptanceUnitTest\\DFAcceptanceUnitTest.csproj --targetFiles C:\\Dayforce\\tip3\\Test\\DFAcceptanceUnitTest\\obj\\BindingRedirectTargetFiles.txt --solutions C:\\Dayforce\\tip3\\Build\\projects.yml --outDir C:\\Dayforce\\tip3\\bin.link\\ --writeBindingRedirects --usePrivateProbingPath --includeUnsigned ",
+      "commandLineArgs": "-f ..\\tip3\\src\\Recruiting\\UI\\CandidatePortal\\CandidatePortal.csproj -t obj\\BindingRedirectTargetFiles.txt -s ..\\tip3\\Build\\projects.yml -o ..\\tip3\\bin.link\\_PublishedWebsites\\CandidatePortal\\bin\\ -w -r ..\\tip3\\Build\\2010\\Deployer\\Templates\\AssemblyBindingRedirects\\CandidatePortal.txt -v",
       "workingDirectory": "c:\\dayforce\\tip"
     }
   }

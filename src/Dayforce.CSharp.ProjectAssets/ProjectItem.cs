@@ -6,7 +6,7 @@ using NuGet.Versioning;
 
 namespace Dayforce.CSharp.ProjectAssets
 {
-    public class ProjectItem(LockFileTargetLibrary library) : LibraryItem(library)
+    public class ProjectItem(LockFileTargetLibrary library, string solution) : LibraryItem(library, solution)
     {
         [JsonIgnore]
         public override bool HasRuntimeAssemblies => true;

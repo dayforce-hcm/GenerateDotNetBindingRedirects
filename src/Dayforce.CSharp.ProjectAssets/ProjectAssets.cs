@@ -45,7 +45,7 @@ namespace Dayforce.CSharp.ProjectAssets
                     firstProject = project;
                 }
 
-                libs[project.AssemblyName] = GetProjectLib(firstProject, project.AssemblyName, projectAssets.Targets[0].Libraries, versionRanges);
+                libs[project.AssemblyName] = GetProjectLib(firstProject, project.AssemblyName, projectAssets.Targets[0].Libraries, versionRanges, project.Solution);
 
                 specialVersions.UnionWith(projectAssets.ProjectFileDependencyGroups[0].Dependencies.Where(o => o.Contains('*')));
             }
@@ -61,7 +61,7 @@ namespace Dayforce.CSharp.ProjectAssets
         }
 
         private LibraryItem GetProjectLib(ProjectContext firstProject, string asmName,
-            ICollection<LockFileTargetLibrary> projectDependencies, IDictionary<string, VersionRange> versionRanges)
+            ICollection<LockFileTargetLibrary> projectDependencies, IDictionary<string, VersionRange> versionRanges, string solution)
         {
             Log.Instance.WriteVerbose("ProjectAssets({0}) : {1}/{2}", firstProject, asmName, C.V1.Value);
             return LibraryItem.Create(new LockFileTargetLibrary
@@ -72,7 +72,7 @@ namespace Dayforce.CSharp.ProjectAssets
                 Framework = TargetFramework.DotNetFrameworkName,
                 RuntimeAssemblies = [new LockFileItem($"bin/placeholder/{asmName}.dll")],
                 Dependencies = [.. projectDependencies.Select(lib => new PackageDependency(lib.Name, GetVersionRange(versionRanges, lib)))]
-            }, C.V1.Range, PackageFolders);
+            }, C.V1.Range, PackageFolders, solution);
         }
 
         private static VersionRange GetVersionRange(IDictionary<string, VersionRange> versionRanges, LockFileTargetLibrary lib) =>
@@ -111,18 +111,18 @@ namespace Dayforce.CSharp.ProjectAssets
                     if (!libs.TryGetValue(lib.Name, out var prev))
                     {
                         Log.Instance.WriteVerbose("ProjectAssets({0}) : {1}/{2}", project, lib.Name, lib.Version);
-                        libs[lib.Name] = LibraryItem.Create(lib, resolved[lib.Name], packageFolders);
+                        libs[lib.Name] = LibraryItem.Create(lib, resolved[lib.Name], packageFolders, project.Solution);
                     }
                     else if (prev.Version < lib.Version)
                     {
                         Log.Instance.WriteVerbose("ProjectAssets({0}) : {1}/{2} (prev {3})", project, lib.Name, lib.Version, prev.Version);
                         SaveDiscarded(ref discarded, prev);
-                        libs[lib.Name] = LibraryItem.Create(lib, resolved[lib.Name], packageFolders);
+                        libs[lib.Name] = LibraryItem.Create(lib, resolved[lib.Name], packageFolders, project.Solution);
                     }
                     else if (prev.Version > lib.Version)
                     {
                         Log.Instance.WriteVerbose("ProjectAssets({0}) : {1}/{2} (discard {3})", project, lib.Name, prev.Version, lib.Version);
-                        SaveDiscarded(ref discarded, LibraryItem.Create(lib, resolved[lib.Name], packageFolders));
+                        SaveDiscarded(ref discarded, LibraryItem.Create(lib, resolved[lib.Name], packageFolders, project.Solution));
                     }
                     else
                     {
