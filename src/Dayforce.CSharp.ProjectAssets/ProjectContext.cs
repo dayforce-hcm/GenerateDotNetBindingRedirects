@@ -60,12 +60,11 @@ namespace Dayforce.CSharp.ProjectAssets
                     .Select(o => Path.GetFileNameWithoutExtension(o.Value))
                     .ToList();
 
-                var projectTypeGuids = nav.SelectSingleNode("/p:Project/p:PropertyGroup/p:ProjectTypeGuids/text()", nsmgr)?.Value;
-                bool isWebApplication = projectTypeGuids?.Contains("{349c5851-65df-11da-9384-00065b846f21}", C.IGNORE_CASE) == true;
+                var sdkStyle = false;
+                bool isWebApplication = IsLegacyWebApplication(nav, nsmgr) || (sdkStyle = IsSdkWebApplication(nav, nsmgr));
                 var configFileName = isWebApplication ? "web.config" : "app.config";
                 var expectedConfigFilePath = Path.GetFullPath($"{projectFilePath}\\..\\{configFileName}");
                 string actualConfigFilePath = null;
-                var sdkStyle = false;
 
                 if (!isWebApplication)
                 {
@@ -88,6 +87,18 @@ namespace Dayforce.CSharp.ProjectAssets
             {
                 throw new ApplicationException("Failed to process " + projectFilePath, exc);
             }
+        }
+
+        private static bool IsLegacyWebApplication(XPathNavigator nav, XmlNamespaceManager nsmgr)
+        {
+            var projectTypeGuids = nav.SelectSingleNode("/p:Project/p:PropertyGroup/p:ProjectTypeGuids/text()", nsmgr)?.Value;
+            return projectTypeGuids?.Contains("{349c5851-65df-11da-9384-00065b846f21}", C.IGNORE_CASE) == true;
+        }
+
+        private static bool IsSdkWebApplication(XPathNavigator nav, XmlNamespaceManager nsmgr)
+        {
+            var sdk = nav.SelectSingleNode("/p:Project/@p:Sdk", nsmgr)?.Value;
+            return sdk?.StartsWith("MSBuild.SDK.SystemWeb", C.IGNORE_CASE) == true;
         }
 
         public static XPathNavigator LocateAppConfigInProjectXml(XPathNavigator nav, XmlNamespaceManager nsmgr) =>

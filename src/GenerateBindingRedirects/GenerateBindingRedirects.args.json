@@ -4,7 +4,7 @@
   "Items": [
     {
       "Id": "e5c0d3d5-30bc-4696-b29f-5fb6ff11ce7d",
-      "Command": "-f ..\\tip3\\src\\Recruiting\\UI\\CandidatePortal\\CandidatePortal.csproj -t obj\\BindingRedirectTargetFiles.txt -s ..\\tip3\\Build\\projects.yml -o ..\\tip3\\bin.link\\_PublishedWebsites\\CandidatePortal\\bin\\ -w -r ..\\tip3\\Build\\2010\\Deployer\\Templates\\AssemblyBindingRedirects\\CandidatePortal.txt -v"
+      "Command": "-f ..\\tip2\\src\\Platform\\UI\\OData\\OData.csproj -t obj\\BindingRedirectTargetFiles.txt -s ..\\tip2\\Build\\projects.yml -o ..\\tip2\\bin.link\\_PublishedWebsites\\OData\\bin\\ -w -r ..\\tip2\\Build\\2010\\Deployer\\Templates\\AssemblyBindingRedirects\\OData.txt -v"
     },
     {
       "Id": "c0c0958d-e7ce-4fe3-b3b4-d2ccc586d060",
