@@ -286,7 +286,7 @@ namespace GenerateBindingRedirects
                     {
                         var dstFilePath = $"_BindingRedirects/{r.AssemblyName}/{r.Version}/{Path.GetFileName(r.TargetFilePath)}";
                         codeBase = @$"
-        <codeBase version=""{r.Version}"" href=""{dstFilePath}"" />""";
+        <codeBase version=""{r.Version}"" href=""{dstFilePath}"" />";
                         string fullDstFilePath = Path.Combine(outDir, dstFilePath);
                         CopyFile(r.TargetFilePath, fullDstFilePath);
                         if (r.TargetFilePath.EndsWith("/Confluent.Kafka.dll", C.IGNORE_CASE))
@@ -375,7 +375,6 @@ namespace GenerateBindingRedirects
                     e.Attribute("PublicKeyToken").Value))
                 .ToDictionary(a => (a.AssemblyName, a.Version));
         }
-
 
         private static void AssertBindingRedirectsInFile(string outputBindingRedirects, string expected)
         {

@@ -274,19 +274,6 @@ namespace GenerateBindingRedirects
             }
         }
 
-        private static string GetRelativeFilePath(string wsPath, string filePath)
-        {
-            if (wsPath != null &&
-                filePath.Length > wsPath.Length &&
-                (filePath[wsPath.Length] == '\\' || filePath[wsPath.Length] == '/') &&
-                filePath.StartsWith(wsPath, StringComparison.OrdinalIgnoreCase))
-            {
-                filePath = filePath[(wsPath.Length + 1)..];
-            }
-
-            return filePath;
-        }
-
         private static bool IsOnlyBindingsInConfig(XmlDocument doc, out bool isEmpty)
         {
             isEmpty = false;

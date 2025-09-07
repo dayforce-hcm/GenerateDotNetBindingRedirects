@@ -12,7 +12,7 @@
     },
     {
       "Id": "d4df1d3b-c75d-4c48-89cd-6291e9cb6e27",
-      "Command": "-f Test\\DFAcceptanceTest\\DFAcceptanceTest\\SpecFlowTest.HR.API\\SpecFlowTest.HR.API.csproj -t obj\\BindingRedirectTargetFiles.txt -s Build\\projects.yml -w -p -o bin\\Test\\DFAcceptanceTest\\ "
+      "Command": "-f src/WFM/AT/SpecFlowTest.WFM/SpecFlowTest.WFM.csproj -t obj\\BindingRedirectTargetFiles.txt -s Build\\projects.yml -w -p -o bin\\Test\\DFAcceptanceTest\\ "
     },
     {
       "Id": "d0ffbc95-4e34-490a-b31d-999aae88275f",
