@@ -31,7 +31,7 @@ jobs:
     displayName: Checkout ${{ variables['Build.Repository.Name'] }}
 
   - task: UseDotNet@2
-    displayName: Use .NET Core sdk 6.x
+    displayName: Use .NET Core sdk 6.x (for unit tests)
     inputs:
       version: 6.x
 
@@ -42,7 +42,7 @@ jobs:
   - template: ci/build-and-test.yml@templates
     parameters:
       checkout: false
-      dotNetCoreVersion: 8.x
+      dotNetCoreVersion: 9.x
 
   - template: ci/nuget-pack-as-tool.yml@templates
     parameters:

@@ -5,7 +5,7 @@ trigger:
 - hotfix/*
 
 variables:
-  binDir: bin\Release\net8.0
+  binDir: bin\Release\net9.0
 
 name: 2.5.$(Date:yy)$(DayOfYear)$(Rev:.r)
 
@@ -33,7 +33,7 @@ jobs:
     displayName: Checkout ${{ variables['Build.Repository.Name'] }}
 
   - task: UseDotNet@2
-    displayName: Use .NET Core sdk 6.x
+    displayName: Use .NET Core sdk 6.x (for unit tests)
     inputs:
       version: 6.x
 
@@ -44,7 +44,7 @@ jobs:
   - template: ci/build-and-test.yml@templates
     parameters:
       checkout: false
-      dotNetCoreVersion: 8.x
+      dotNetCoreVersion: 9.x
 
   - template: ci/publish-build-artifacts.yml@templates
 
