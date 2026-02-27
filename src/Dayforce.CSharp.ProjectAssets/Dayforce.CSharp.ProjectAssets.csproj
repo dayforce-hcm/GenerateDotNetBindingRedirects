@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Glob" Version="1.1.9" />
     <PackageReference Include="NuGet.ProjectModel" Version="7.3.0" />
     <PackageReference Include="Microsoft.Build" Version="17.14.28" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="10.0.3" />

@@ -57,7 +57,8 @@ namespace Dayforce.CSharp.ProjectAssets
 
                 var projectReferences = nav.Select("/p:Project/p:ItemGroup/p:ProjectReference/@Include", nsmgr)
                     .Cast<XPathNavigator>()
-                    .Select(o => Path.GetFileNameWithoutExtension(o.Value))
+                    .SelectMany(o => ExpandGlob(projectFilePath, o))
+                    .Select(Path.GetFileNameWithoutExtension)
                     .ToList();
 
                 var sdkStyle = false;
@@ -87,6 +88,33 @@ namespace Dayforce.CSharp.ProjectAssets
             {
                 throw new ApplicationException("Failed to process " + projectFilePath, exc);
             }
+        }
+
+
+        private static IEnumerable<string> ExpandGlob(string projectFilePath, XPathNavigator o)
+        {
+            if (o.Value.Contains('*'))
+            {
+                var path = o.Value;
+                string basePath = null;
+                if (path.StartsWith("$(WorkspaceRoot)", StringComparison.OrdinalIgnoreCase))
+                {
+                    var pfxLen = "$(WorkspaceRoot)".Length;
+                    if (path[pfxLen] == '/' || path[pfxLen] == '\\')
+                    {
+                        pfxLen++;
+                    }
+                    path = path[pfxLen..];
+                    basePath = projectFilePath.GetGitWorkspaceRoot();
+                }
+                else if (!Path.IsPathRooted(path))
+                {
+                    basePath = Path.GetDirectoryName(projectFilePath);
+                }
+
+                return GlobExpressions.Glob.Files(basePath, path);
+            }
+            return [o.Value];
         }
 
         private static bool IsLegacyWebApplication(XPathNavigator nav, XmlNamespaceManager nsmgr)
