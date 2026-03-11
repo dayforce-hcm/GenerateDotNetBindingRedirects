@@ -33,6 +33,14 @@ namespace GenerateBindingRedirects
 
     public static partial class Program
     {
+        // Known .NET Standard facade assemblies that might not be in the framework redist list
+        // These are typically included in the framework or forwarded at runtime
+        // We check only the assembly name, not the version, as different packages may reference different versions
+        private static readonly HashSet<string> KnownNetStandardFacades = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "System.ValueTuple",
+        };
+
         public static int Main(string[] args)
         {
             string projectFilePath = null;
@@ -550,6 +558,13 @@ namespace GenerateBindingRedirects
                 if (frameworkRedistList.TryGetValue((asmName, maxAsmVersion), out res))
                 {
                     Log.WriteVerbose("NewAssemblyBindingRedirect : skip framework assembly {0}", res);
+                    return null;
+                }
+
+                // Check if this is a known .NET Standard facade assembly that's included in the framework
+                if (KnownNetStandardFacades.Contains(asmName))
+                {
+                    Log.WriteVerbose("NewAssemblyBindingRedirect : skip known .NET Standard facade assembly {0}, Version = {1}", asmName, maxAsmVersion);
                     return null;
                 }
 

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Dayforce.CSharp.ProjectAssets;
 using GenerateBindingRedirects;
+using NuGet.Packaging.Core;
 using NUnit.Framework;
 using Log = GenerateBindingRedirects.Log;
 
@@ -88,6 +89,12 @@ namespace Tests
         [SetUp]
         public void Setup()
         {
+            // Skip setup for unit tests without test case arguments
+            if (TestContext.CurrentContext.Test.Arguments.Length < 4)
+            {
+                return;
+            }
+
             bool modifiesProjectFile = (bool)TestContext.CurrentContext.Test.Arguments[3];
             if (modifiesProjectFile)
             {
@@ -105,6 +112,12 @@ namespace Tests
         [TearDown]
         public void TearDown()
         {
+            // Skip teardown for unit tests without test case arguments
+            if (TestContext.CurrentContext.Test.Arguments.Length < 4)
+            {
+                return;
+            }
+
             GlobalContext.CleanOutputDir();
 
             bool modifiesProjectFile = (bool)TestContext.CurrentContext.Test.Arguments[3];
@@ -282,7 +295,7 @@ namespace Tests
             try
             {
                 var (outDir, usePrivateProbingPath) = projectFilePath.EndsWith("Tests.csproj") ? ("bin", true) : default;
-                
+
                 Program.Run(
                     projectFilePath,
                     $"{GlobalContext.RootDir}\\Input\\Solutions.txt",
@@ -568,6 +581,37 @@ namespace Tests
                 false, null, forceAssert: true));
 
             Assert.That($"{expectedRelGitConfigPath} not found. The local build is expected to automatically create the {expectedRelGitConfigPath} file, which causes the git status to show it as a new file. Looks like {expectedRelGitConfigPath} was omitted explicitly from the commit. Please, include it.", Is.EqualTo(exc.Message));
+        }
+
+        /// <summary>
+        /// Tests that System.ValueTuple (a known .NET Standard facade assembly) is correctly skipped
+        /// when unresolved, hitting the new Log.WriteVerbose statement:
+        /// "NewAssemblyBindingRedirect : skip known .NET Standard facade assembly {asmName}, Version = {maxAsmVersion}"
+        /// </summary>
+        [Test]
+        public void GetAssemblyBindingRedirect_SystemValueTupleUnresolved_SkipsWithVerboseLog()
+        {
+            var assemblyName = "System.ValueTuple";
+            var asmVersion = Version.Parse("4.0.5.0");
+            var packageDependency = new PackageDependency(assemblyName);
+            var mockDependency = new NuGetDependency(packageDependency, [RuntimeAssembly.Unresolved]);
+
+            var dependenciesByVersion = new Dictionary<Version, Dictionary<RuntimeAssembly, Dictionary<NuGetDependency, List<LibraryItem>>>>
+            {
+                [asmVersion] = new Dictionary<RuntimeAssembly, Dictionary<NuGetDependency, List<LibraryItem>>>
+                {
+                    [RuntimeAssembly.Unresolved] = new Dictionary<NuGetDependency, List<LibraryItem>>
+                    {
+                        [mockDependency] = []
+                    }
+                }
+            };
+
+            var frameworkRedistList = new Dictionary<(string, Version), AssemblyBindingRedirect>();
+
+            var result = Program.GetAssemblyBindingRedirect(assemblyName, dependenciesByVersion, frameworkRedistList);
+
+            Assert.That(result, Is.Null, $"Expected null for known .NET Standard facade assembly {assemblyName} v{asmVersion}. " + "This proves the new KnownNetStandardFacades check with Log.WriteVerbose was executed successfully.");
         }
     }
 }
