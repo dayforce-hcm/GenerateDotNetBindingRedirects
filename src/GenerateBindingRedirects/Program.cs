@@ -195,6 +195,12 @@ namespace GenerateBindingRedirects
             bool includeUnsigned = false,
             bool usePrivateProbingPath = false)
         {
+            GitVersionControl.Instance.WorkspaceRoot = solutionsListFile.GetGitWorkspaceRoot();
+            if (Log.Verbose)
+            {
+                Log.WriteVerbose("HEAD: {0}", GitVersionControl.Instance.HEAD);
+            }
+
             var sc = new SolutionsContext(solutionsListFile, new DayforceSolutionsListFileReader(), allowNonexistingSolutions);
             if (dumpSolutionContext)
             {

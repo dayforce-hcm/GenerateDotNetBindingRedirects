@@ -3,9 +3,10 @@ using System;
 
 namespace Tests;
 
-internal class NoGitVersionControl : IGitVersionControl
+internal abstract class DummyGitVersionControl<T> : IGitVersionControl
+    where T : DummyGitVersionControl<T>, new()
 {
-    internal static readonly NoGitVersionControl Instance = new();
+    internal static readonly T Instance = new();
 
     internal readonly struct Scope : IDisposable
     {
@@ -20,27 +21,17 @@ internal class NoGitVersionControl : IGitVersionControl
         public readonly void Dispose() => GitVersionControl.Instance = m_prevInstance;
     }
 
-    private NoGitVersionControl() { }
-    public bool IsTracked(string filePath) => false;
+    public string WorkspaceRoot { get; set; }
+    public abstract bool IsTracked(string filePath);
+    public string HEAD => null;
 }
 
-internal class ForceGitVersionControl : IGitVersionControl
+internal class NoGitVersionControl : DummyGitVersionControl<NoGitVersionControl>
 {
-    internal static readonly ForceGitVersionControl Instance = new();
+    public override bool IsTracked(string filePath) => false;
+}
 
-    internal readonly struct Scope : IDisposable
-    {
-        private readonly IGitVersionControl m_prevInstance;
-
-        public Scope()
-        {
-            m_prevInstance = GitVersionControl.Instance;
-            GitVersionControl.Instance = Instance;
-        }
-
-        public readonly void Dispose() => GitVersionControl.Instance = m_prevInstance;
-    }
-
-    private ForceGitVersionControl() { }
-    public bool IsTracked(string filePath) => true;
+internal class ForceGitVersionControl : DummyGitVersionControl<ForceGitVersionControl>
+{
+    public override bool IsTracked(string filePath) => true;
 }
