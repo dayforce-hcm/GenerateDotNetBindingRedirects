@@ -74,7 +74,7 @@ namespace GenerateBindingRedirects
 
         private void UpdateOrAssertGitIgnore(bool assert)
         {
-            var gitIgnoreFilePath = Path.GetFullPath(ExpectedConfigFilePath + "\\..\\.gitignore");
+            var gitIgnoreFilePath = Path.Combine(Path.GetDirectoryName(ExpectedConfigFilePath), ".gitignore");
             var verb = "create";
             var actualStatus = "not found";
             var expectedStatus = "a new file";

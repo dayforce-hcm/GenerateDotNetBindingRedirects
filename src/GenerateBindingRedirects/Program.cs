@@ -179,6 +179,7 @@ namespace GenerateBindingRedirects
             finally
             {
                 Log.Cleanup();
+                (GitVersionControl.Instance as IDisposable)?.Dispose();
             }
             return 0;
         }
@@ -195,7 +196,8 @@ namespace GenerateBindingRedirects
             bool includeUnsigned = false,
             bool usePrivateProbingPath = false)
         {
-            GitVersionControl.Instance.WorkspaceRoot = solutionsListFile.GetGitWorkspaceRoot();
+            GitVersionControl.Instance.WorkspaceRoot = solutionsListFile.GetGitWorkspaceRoot()
+                ?? throw new ApplicationException($"The file {solutionsListFile} is not inside a git repository.");
             if (Log.Verbose)
             {
                 Log.WriteVerbose("HEAD: {0}", GitVersionControl.Instance.HEAD);
@@ -356,7 +358,7 @@ namespace GenerateBindingRedirects
         {
             if (!File.Exists(dstFilePath))
             {
-                Directory.CreateDirectory(dstFilePath + "\\..");
+                Directory.CreateDirectory(Path.GetDirectoryName(dstFilePath));
                 try
                 {
                     File.Copy(srcFilePath, dstFilePath);
@@ -451,7 +453,7 @@ namespace GenerateBindingRedirects
             {
                 foreach (var runtimeAssembly in package.RuntimeAssemblies)
                 {
-                    var module = ModuleDefinition.ReadModule(runtimeAssembly.FilePath);
+                    using var module = ModuleDefinition.ReadModule(runtimeAssembly.FilePath);
                     foreach (var asmRef in module.AssemblyReferences)
                     {
                         if (!dependencies.TryGetValue(asmRef.Name, out var dependenciesByVersion))
@@ -535,11 +537,8 @@ namespace GenerateBindingRedirects
             return dependencies;
         }
 
-        public static AssemblyBindingRedirect GetAssemblyBindingRedirect(string asmName, DependenciesByVersion dependenciesByVersion,
-            IReadOnlyDictionary<(string, Version), AssemblyBindingRedirect> frameworkRedistList)
+        private static (RuntimeAssembly Found, Version MaxAsmVersion) ResolveTopRuntimeAssembly(DependenciesByVersion dependenciesByVersion)
         {
-            Log.DependenciesByVersion(asmName, dependenciesByVersion);
-
             var maxAsmVersion = dependenciesByVersion.Keys.Max();
             var runtimeAssemblies = dependenciesByVersion[maxAsmVersion];
             var found = runtimeAssemblies.First();
@@ -556,9 +555,18 @@ namespace GenerateBindingRedirects
                     }
                 }
             }
+            return (found.Key, maxAsmVersion);
+        }
+
+        public static AssemblyBindingRedirect GetAssemblyBindingRedirect(string asmName, DependenciesByVersion dependenciesByVersion,
+            IReadOnlyDictionary<(string, Version), AssemblyBindingRedirect> frameworkRedistList)
+        {
+            Log.DependenciesByVersion(asmName, dependenciesByVersion);
+
+            var (found, maxAsmVersion) = ResolveTopRuntimeAssembly(dependenciesByVersion);
 
             AssemblyBindingRedirect res;
-            if (found.Key.FilePath == RuntimeAssembly.Unresolved.FilePath)
+            if (found.FilePath == RuntimeAssembly.Unresolved.FilePath)
             {
                 // We do not have an actual file for the binding redirect. Maybe it is part of the .Net framework?
                 if (frameworkRedistList.TryGetValue((asmName, maxAsmVersion), out res))
@@ -577,8 +585,8 @@ namespace GenerateBindingRedirects
                 throw new ApplicationException($"Unable to resolve assembly binding redirect for {asmName}, Version = {maxAsmVersion}.");
             }
 
-            res = new AssemblyBindingRedirect(found.Key.FilePath);
-            Log.WriteVerbose("NewAssemblyBindingRedirect : {0} - {1}", found.Key.FilePath, res);
+            res = new AssemblyBindingRedirect(found.FilePath);
+            Log.WriteVerbose("NewAssemblyBindingRedirect : {0} - {1}", found.FilePath, res);
             return res;
         }
 
@@ -588,30 +596,16 @@ namespace GenerateBindingRedirects
             {
                 return null;
             }
-            var maxAsmVersion = dependenciesByVersion.Keys.Max();
-            var runtimeAssemblies = dependenciesByVersion[maxAsmVersion];
-            var found = runtimeAssemblies.First();
-            if (runtimeAssemblies.Count > 1)
-            {
-                var maxNuGetVersion = GetMaxNuGetVersion(found.Value);
-                foreach (var r in runtimeAssemblies.Skip(1))
-                {
-                    var other = GetMaxNuGetVersion(r.Value);
-                    if (other > maxNuGetVersion)
-                    {
-                        found = r;
-                        maxNuGetVersion = other;
-                    }
-                }
-            }
 
-            if (found.Key.FilePath == RuntimeAssembly.Unresolved.FilePath)
+            var found = ResolveTopRuntimeAssembly(dependenciesByVersion).Found;
+
+            if (found.FilePath == RuntimeAssembly.Unresolved.FilePath)
             {
                 return null;
             }
 
-            Log.WriteVerbose("NewVulnerableNonConflictingDependency : {0}", found.Key.FilePath);
-            return found.Key.FilePath;
+            Log.WriteVerbose("NewVulnerableNonConflictingDependency : {0}", found.FilePath);
+            return found.FilePath;
         }
 
         private static NuGetVersion GetMaxNuGetVersion(Dictionary<NuGetDependency, List<LibraryItem>> value) => value.Keys.Select(o => o.VersionRange.MinVersion).Max();

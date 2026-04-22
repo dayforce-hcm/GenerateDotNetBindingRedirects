@@ -12,7 +12,7 @@ internal interface IGitVersionControl
     string HEAD { get; }
 }
 
-internal class GitVersionControl : IGitVersionControl
+internal class GitVersionControl : IGitVersionControl, IDisposable
 {
     private readonly Lazy<Repository> m_repository;
 
@@ -42,5 +42,13 @@ internal class GitVersionControl : IGitVersionControl
         filePath = Directory.GetFiles(Path.GetDirectoryName(filePath), Path.GetFileName(filePath))[0];
         filePath = filePath[wsPath.Length..].Replace('\\', '/');
         return m_repository.Value.Index[filePath] != null || m_repository.Value.Lookup("HEAD:" + filePath, ObjectType.Blob) != null;
+    }
+
+    public void Dispose()
+    {
+        if (m_repository.IsValueCreated)
+        {
+            m_repository.Value.Dispose();
+        }
     }
 }
