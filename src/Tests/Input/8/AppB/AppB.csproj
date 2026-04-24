@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="LibA">
+      <HintPath>..\LibA\bin\Debug\net472\LibA.dll</HintPath>
+    </Reference>
+    <PackageReference Include="IdentityModel" />
+  </ItemGroup>
+</Project>

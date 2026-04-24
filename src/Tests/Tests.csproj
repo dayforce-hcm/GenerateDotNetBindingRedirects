@@ -6,7 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Input\**" />
+    <None Include="Input\**" />
+    <None Remove="Input\**\bin\**;Input\**\obj\**" />
+    <Compile Remove="Input\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,5 +21,4 @@
     <ProjectReference Include="..\GenerateBindingRedirects\GenerateBindingRedirects.csproj" />
     <ProjectReference Include="..\GenerateNuGetUsageReport\GenerateNuGetUsageReport.csproj" />
   </ItemGroup>
-
 </Project>

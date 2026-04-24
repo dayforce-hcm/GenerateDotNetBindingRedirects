@@ -30,15 +30,6 @@ jobs:
     lfs: false
     displayName: Checkout ${{ variables['Build.Repository.Name'] }}
 
-  - task: UseDotNet@2
-    displayName: Use .NET Core sdk 6.x (for unit tests)
-    inputs:
-      version: 6.x
-
-  - script: |
-      echo {"sdk":{"version":"6.x"}} > $(Build.Repository.Name)\src\Tests\Input\5\global.json
-    displayName: Create src\Tests\Input\5\global.json
-
   - template: ci/build-and-test.yml@templates
     parameters:
       checkout: false

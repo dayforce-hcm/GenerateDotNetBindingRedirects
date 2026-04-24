@@ -1,0 +1,46 @@
+HEAD: 
+ProjectContext(LegacyWeb\LegacyWeb.csproj) : LegacyWeb
+ProjectAssets(LegacyWeb (LegacyWeb @ LegacyWeb.sln)) : using 2 package folders
+ProjectAssets(LegacyWeb (LegacyWeb @ LegacyWeb.sln)) :   package folder #1 - C:\Users\P11F70F\.nuget\packages\
+ProjectAssets(LegacyWeb (LegacyWeb @ LegacyWeb.sln)) :   package folder #2 - C:\Program Files (x86)\Microsoft Visual Studio\Shared\NuGetPackages\
+ProjectAssets(LegacyWeb (LegacyWeb @ LegacyWeb.sln)) : IdentityModel/3.10.10
+ProjectAssets(LegacyWeb (LegacyWeb @ LegacyWeb.sln)) : Newtonsoft.Json/12.0.3
+ProjectAssets(LegacyWeb (LegacyWeb @ LegacyWeb.sln)) : System.Text.Encodings.Web/4.5.0
+ProjectAssets(LegacyWeb (LegacyWeb @ LegacyWeb.sln)) : LegacyWeb/1.0.0
+ProjectAssets(LegacyWeb (LegacyWeb @ LegacyWeb.sln)) : 4 libraries
+CompleteConstruction(IdentityModel) : take dependency Newtonsoft.Json [11.0.1, ) - C:\Users\P11F70F\.nuget\packages\Newtonsoft.Json\12.0.3\lib\net45
+CompleteConstruction(IdentityModel) : take dependency Newtonsoft.Json [11.0.1, ) (Newtonsoft.Json\12.0.3\lib/net45/Newtonsoft.Json.dll (12.0.0.0))
+CompleteConstruction(IdentityModel) : take dependency System.Text.Encodings.Web [4.5.0, ) - C:\Users\P11F70F\.nuget\packages\System.Text.Encodings.Web\4.5.0\lib\netstandard2.0
+CompleteConstruction(IdentityModel) : take dependency System.Text.Encodings.Web [4.5.0, ) (System.Text.Encodings.Web\4.5.0\lib/netstandard2.0/System.Text.Encodings.Web.dll (4.0.3.0))
+CompleteConstruction(LegacyWeb) : take dependency IdentityModel [3.10.10, ) - C:\Users\P11F70F\.nuget\packages\IdentityModel\3.10.10\lib\net452
+CompleteConstruction(LegacyWeb) : take dependency IdentityModel [3.10.10, ) (IdentityModel\3.10.10\lib/net452/IdentityModel.dll (3.10.10.0))
+CompleteConstruction(LegacyWeb) : take dependency Newtonsoft.Json [12.0.3, ) - C:\Users\P11F70F\.nuget\packages\Newtonsoft.Json\12.0.3\lib\net45
+CompleteConstruction(LegacyWeb) : take dependency Newtonsoft.Json [12.0.3, ) (Newtonsoft.Json\12.0.3\lib/net45/Newtonsoft.Json.dll (12.0.0.0))
+CompleteConstruction(LegacyWeb) : take dependency System.Text.Encodings.Web [4.5.0, ) - C:\Users\P11F70F\.nuget\packages\System.Text.Encodings.Web\4.5.0\lib\netstandard2.0
+CompleteConstruction(LegacyWeb) : take dependency System.Text.Encodings.Web [4.5.0, ) (System.Text.Encodings.Web\4.5.0\lib/netstandard2.0/System.Text.Encodings.Web.dll (4.0.3.0))
+3 NuGet packages with some runtime assemblies:
+  [IdentityModel] = IdentityModel/[3.10.10, ) (r = 1 , nd = 2)
+  [Newtonsoft.Json] = Newtonsoft.Json/[12.0.3, ) (r = 1 , nd = 0)
+  [System.Text.Encodings.Web] = System.Text.Encodings.Web/[4.5.0, ) (r = 1 , nd = 0)
+0 NuGet packages with no runtime assemblies:
+1 projects:
+  LegacyWeb
+[Curious] RuntimeAssembly(Newtonsoft.Json\12.0.3\lib/net45/Newtonsoft.Json.dll, Version=12.0.0.0) : 2 variants of the same package
+[Curious] RuntimeAssembly(Newtonsoft.Json\12.0.3\lib/net45/Newtonsoft.Json.dll, Version=12.0.0.0) : [11.0.1, )
+[Curious] RuntimeAssembly(Newtonsoft.Json\12.0.3\lib/net45/Newtonsoft.Json.dll, Version=12.0.0.0) : [12.0.3, )
+AssemblyReferenceOf(IdentityModel\3.10.10\lib/net452/IdentityModel.dll) : skip mscorlib (4.0.0.0) - not found (framework assembly)
+AssemblyReferenceOf(IdentityModel\3.10.10\lib/net452/IdentityModel.dll) : skip System.Net.Http (4.0.0.0) - not found (unknown)
+AssemblyReferenceOf(IdentityModel\3.10.10\lib/net452/IdentityModel.dll) : skip System (4.0.0.0) - not found (framework assembly)
+AssemblyReferenceOf(IdentityModel\3.10.10\lib/net452/IdentityModel.dll) : add Newtonsoft.Json (11.0.0.0)
+AssemblyReferenceOf(IdentityModel\3.10.10\lib/net452/IdentityModel.dll) : skip System.Core (4.0.0.0) - not found (framework assembly)
+AssemblyReferenceOf(IdentityModel\3.10.10\lib/net452/IdentityModel.dll) : skip System.Text.Encodings.Web (4.0.3.0) - version match
+DependencyOf(Newtonsoft.Json) : 3 packages
+DependencyOf(Newtonsoft.Json, Version = 12.0.0.0) : 2 packages
+DependencyOf(Newtonsoft.Json, Version = 12.0.0.0, Newtonsoft.Json\12.0.3\lib/net45/Newtonsoft.Json.dll, [11.0.1, )) : 1 packages
+DependencyOf(Newtonsoft.Json, Version = 12.0.0.0, Newtonsoft.Json\12.0.3\lib/net45/Newtonsoft.Json.dll, [11.0.1, )) : IdentityModel/[3.10.10, ) (r = 1 , nd = 2)
+DependencyOf(Newtonsoft.Json, Version = 12.0.0.0, Newtonsoft.Json\12.0.3\lib/net45/Newtonsoft.Json.dll, [12.0.3, )) : 1 packages
+DependencyOf(Newtonsoft.Json, Version = 12.0.0.0, Newtonsoft.Json\12.0.3\lib/net45/Newtonsoft.Json.dll, [12.0.3, )) : LegacyWeb (nd = 3)
+DependencyOf(Newtonsoft.Json, Version = 11.0.0.0) : 1 packages
+DependencyOf(Newtonsoft.Json, Version = 11.0.0.0, ***, (, )) : 1 packages
+DependencyOf(Newtonsoft.Json, Version = 11.0.0.0, ***, (, )) : IdentityModel/[3.10.10, ) (r = 1 , nd = 2)
+NewAssemblyBindingRedirect : C:\Users\P11F70F\.nuget\packages\Newtonsoft.Json\12.0.3\lib/net45/Newtonsoft.Json.dll - Newtonsoft.Json/12.0.0.0 (30AD4FE6B2A6AEED, neutral)

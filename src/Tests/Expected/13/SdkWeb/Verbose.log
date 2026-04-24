@@ -1,0 +1,53 @@
+HEAD: 
+ProjectContext(SdkWeb\SdkWeb.csproj) : SdkWeb
+ProjectAssets(SdkWeb (SdkWeb @ SdkWeb.sln)) : using 2 package folders
+ProjectAssets(SdkWeb (SdkWeb @ SdkWeb.sln)) :   package folder #1 - C:\Users\P11F70F\.nuget\packages\
+ProjectAssets(SdkWeb (SdkWeb @ SdkWeb.sln)) :   package folder #2 - C:\Program Files (x86)\Microsoft Visual Studio\Shared\NuGetPackages\
+ProjectAssets(SdkWeb (SdkWeb @ SdkWeb.sln)) : IdentityModel/3.10.10
+ProjectAssets(SdkWeb (SdkWeb @ SdkWeb.sln)) : Microsoft.CodeDom.Providers.DotNetCompilerPlatform/4.1.0
+ProjectAssets(SdkWeb (SdkWeb @ SdkWeb.sln)) : Microsoft.Net.Compilers.Toolset/4.12.0
+ProjectAssets(SdkWeb (SdkWeb @ SdkWeb.sln)) : Newtonsoft.Json/12.0.3
+ProjectAssets(SdkWeb (SdkWeb @ SdkWeb.sln)) : System.Text.Encodings.Web/4.5.0
+ProjectAssets(SdkWeb (SdkWeb @ SdkWeb.sln)) : SdkWeb/1.0.0
+ProjectAssets(SdkWeb (SdkWeb @ SdkWeb.sln)) : 6 libraries
+CompleteConstruction(IdentityModel) : take dependency Newtonsoft.Json [11.0.1, ) - C:\Users\P11F70F\.nuget\packages\Newtonsoft.Json\12.0.3\lib\net45
+CompleteConstruction(IdentityModel) : take dependency Newtonsoft.Json [11.0.1, ) (Newtonsoft.Json\12.0.3\lib/net45/Newtonsoft.Json.dll (12.0.0.0))
+CompleteConstruction(IdentityModel) : take dependency System.Text.Encodings.Web [4.5.0, ) - C:\Users\P11F70F\.nuget\packages\System.Text.Encodings.Web\4.5.0\lib\netstandard2.0
+CompleteConstruction(IdentityModel) : take dependency System.Text.Encodings.Web [4.5.0, ) (System.Text.Encodings.Web\4.5.0\lib/netstandard2.0/System.Text.Encodings.Web.dll (4.0.3.0))
+CompleteConstruction(SdkWeb) : take dependency IdentityModel [3.10.10, ) - C:\Users\P11F70F\.nuget\packages\IdentityModel\3.10.10\lib\net452
+CompleteConstruction(SdkWeb) : take dependency IdentityModel [3.10.10, ) (IdentityModel\3.10.10\lib/net452/IdentityModel.dll (3.10.10.0))
+CompleteConstruction(SdkWeb) : take dependency Microsoft.CodeDom.Providers.DotNetCompilerPlatform [4.1.0, ) - C:\Users\P11F70F\.nuget\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform\4.1.0\lib\net472
+CompleteConstruction(SdkWeb) : take dependency Microsoft.CodeDom.Providers.DotNetCompilerPlatform [4.1.0, ) (Microsoft.CodeDom.Providers.DotNetCompilerPlatform\4.1.0\lib/net472/Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll (4.1.0.0))
+CompleteConstruction(SdkWeb) : skip dependency Microsoft.Net.Compilers.Toolset [4.12.0, ) - no runtime assemblies
+CompleteConstruction(SdkWeb) : take dependency Newtonsoft.Json [12.0.3, ) - C:\Users\P11F70F\.nuget\packages\Newtonsoft.Json\12.0.3\lib\net45
+CompleteConstruction(SdkWeb) : take dependency Newtonsoft.Json [12.0.3, ) (Newtonsoft.Json\12.0.3\lib/net45/Newtonsoft.Json.dll (12.0.0.0))
+CompleteConstruction(SdkWeb) : take dependency System.Text.Encodings.Web [4.5.0, ) - C:\Users\P11F70F\.nuget\packages\System.Text.Encodings.Web\4.5.0\lib\netstandard2.0
+CompleteConstruction(SdkWeb) : take dependency System.Text.Encodings.Web [4.5.0, ) (System.Text.Encodings.Web\4.5.0\lib/netstandard2.0/System.Text.Encodings.Web.dll (4.0.3.0))
+4 NuGet packages with some runtime assemblies:
+  [IdentityModel] = IdentityModel/[3.10.10, ) (r = 1 , nd = 2)
+  [Microsoft.CodeDom.Providers.DotNetCompilerPlatform] = Microsoft.CodeDom.Providers.DotNetCompilerPlatform/[4.1.0, ) (r = 1 , nd = 0)
+  [Newtonsoft.Json] = Newtonsoft.Json/[12.0.3, ) (r = 1 , nd = 0)
+  [System.Text.Encodings.Web] = System.Text.Encodings.Web/[4.5.0, ) (r = 1 , nd = 0)
+1 NuGet packages with no runtime assemblies:
+  [Microsoft.Net.Compilers.Toolset] = Microsoft.Net.Compilers.Toolset/[4.12.0, ) (r = 0 , nd = 0)
+1 projects:
+  SdkWeb
+[Curious] RuntimeAssembly(Newtonsoft.Json\12.0.3\lib/net45/Newtonsoft.Json.dll, Version=12.0.0.0) : 2 variants of the same package
+[Curious] RuntimeAssembly(Newtonsoft.Json\12.0.3\lib/net45/Newtonsoft.Json.dll, Version=12.0.0.0) : [11.0.1, )
+[Curious] RuntimeAssembly(Newtonsoft.Json\12.0.3\lib/net45/Newtonsoft.Json.dll, Version=12.0.0.0) : [12.0.3, )
+AssemblyReferenceOf(IdentityModel\3.10.10\lib/net452/IdentityModel.dll) : skip mscorlib (4.0.0.0) - not found (framework assembly)
+AssemblyReferenceOf(IdentityModel\3.10.10\lib/net452/IdentityModel.dll) : skip System.Net.Http (4.0.0.0) - not found (unknown)
+AssemblyReferenceOf(IdentityModel\3.10.10\lib/net452/IdentityModel.dll) : skip System (4.0.0.0) - not found (framework assembly)
+AssemblyReferenceOf(IdentityModel\3.10.10\lib/net452/IdentityModel.dll) : add Newtonsoft.Json (11.0.0.0)
+AssemblyReferenceOf(IdentityModel\3.10.10\lib/net452/IdentityModel.dll) : skip System.Core (4.0.0.0) - not found (framework assembly)
+AssemblyReferenceOf(IdentityModel\3.10.10\lib/net452/IdentityModel.dll) : skip System.Text.Encodings.Web (4.0.3.0) - version match
+DependencyOf(Newtonsoft.Json) : 3 packages
+DependencyOf(Newtonsoft.Json, Version = 12.0.0.0) : 2 packages
+DependencyOf(Newtonsoft.Json, Version = 12.0.0.0, Newtonsoft.Json\12.0.3\lib/net45/Newtonsoft.Json.dll, [11.0.1, )) : 1 packages
+DependencyOf(Newtonsoft.Json, Version = 12.0.0.0, Newtonsoft.Json\12.0.3\lib/net45/Newtonsoft.Json.dll, [11.0.1, )) : IdentityModel/[3.10.10, ) (r = 1 , nd = 2)
+DependencyOf(Newtonsoft.Json, Version = 12.0.0.0, Newtonsoft.Json\12.0.3\lib/net45/Newtonsoft.Json.dll, [12.0.3, )) : 1 packages
+DependencyOf(Newtonsoft.Json, Version = 12.0.0.0, Newtonsoft.Json\12.0.3\lib/net45/Newtonsoft.Json.dll, [12.0.3, )) : SdkWeb (nd = 4)
+DependencyOf(Newtonsoft.Json, Version = 11.0.0.0) : 1 packages
+DependencyOf(Newtonsoft.Json, Version = 11.0.0.0, ***, (, )) : 1 packages
+DependencyOf(Newtonsoft.Json, Version = 11.0.0.0, ***, (, )) : IdentityModel/[3.10.10, ) (r = 1 , nd = 2)
+NewAssemblyBindingRedirect : C:\Users\P11F70F\.nuget\packages\Newtonsoft.Json\12.0.3\lib/net45/Newtonsoft.Json.dll - Newtonsoft.Json/12.0.0.0 (30AD4FE6B2A6AEED, neutral)

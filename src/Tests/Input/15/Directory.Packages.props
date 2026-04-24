@@ -1,0 +1,10 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="IdentityModel" Version="3.10.10" />
+    <PackageVersion Include="Newtonsoft.Json.Bson" Version="1.0.2" />
+    <PackageVersion Include="Newtonsoft.Json.Schema" Version="3.0.14" />
+  </ItemGroup>
+</Project>

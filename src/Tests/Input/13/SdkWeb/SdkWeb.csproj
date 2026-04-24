@@ -1,0 +1,9 @@
+<Project Sdk="MSBuild.SDK.SystemWeb/4.0.104">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="IdentityModel" />
+    <PackageReference Include="Newtonsoft.Json" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,91 @@
+HEAD: 
+ProjectContext(LibA\LibA.csproj) : LibA
+ProjectContext(AppB\AppB.csproj) : AppB
+ProjectAssets(AppB (AppB @ SolutionB.sln)) : using 2 package folders
+ProjectAssets(AppB (AppB @ SolutionB.sln)) :   package folder #1 - C:\Users\P11F70F\.nuget\packages\
+ProjectAssets(AppB (AppB @ SolutionB.sln)) :   package folder #2 - C:\Program Files (x86)\Microsoft Visual Studio\Shared\NuGetPackages\
+ProjectAssets(AppB (AppB @ SolutionB.sln)) : IdentityModel/3.10.10
+ProjectAssets(AppB (AppB @ SolutionB.sln)) : Newtonsoft.Json/12.0.3
+ProjectAssets(AppB (AppB @ SolutionB.sln)) : Newtonsoft.Json.Schema/3.0.14
+ProjectAssets(AppB (AppB @ SolutionB.sln)) : System.Text.Encodings.Web/4.5.0
+ProjectAssets(AppB (AppB @ SolutionB.sln)) : AppB/1.0.0
+ProjectAssets(LibA (LibA @ SolutionA.sln)) : IdentityModel/3.10.10 (same)
+ProjectAssets(LibA (LibA @ SolutionA.sln)) : Newtonsoft.Json/12.0.3 (discard 12.0.1)
+ProjectAssets(LibA (LibA @ SolutionA.sln)) : Newtonsoft.Json.Bson/1.0.2
+ProjectAssets(LibA (LibA @ SolutionA.sln)) : System.Text.Encodings.Web/4.5.0 (same)
+ProjectAssets(AppB (AppB @ SolutionB.sln)) : LibA/1.0.0
+ProjectAssets(AppB (AppB @ SolutionB.sln)) : 7 libraries
+CompleteConstruction(AppB) : take dependency IdentityModel [3.10.10, ) - C:\Users\P11F70F\.nuget\packages\IdentityModel\3.10.10\lib\net452
+CompleteConstruction(AppB) : take dependency IdentityModel [3.10.10, ) (IdentityModel\3.10.10\lib/net452/IdentityModel.dll (3.10.10.0))
+CompleteConstruction(AppB) : take dependency Newtonsoft.Json [12.0.3, ) - C:\Users\P11F70F\.nuget\packages\Newtonsoft.Json\12.0.3\lib\net45
+CompleteConstruction(AppB) : take dependency Newtonsoft.Json [12.0.3, ) (Newtonsoft.Json\12.0.3\lib/net45/Newtonsoft.Json.dll (12.0.0.0))
+CompleteConstruction(AppB) : take dependency Newtonsoft.Json.Schema [3.0.14, ) - C:\Users\P11F70F\.nuget\packages\Newtonsoft.Json.Schema\3.0.14\lib\net45
+CompleteConstruction(AppB) : take dependency Newtonsoft.Json.Schema [3.0.14, ) (Newtonsoft.Json.Schema\3.0.14\lib/net45/Newtonsoft.Json.Schema.dll (3.0.0.0))
+CompleteConstruction(AppB) : take dependency System.Text.Encodings.Web [4.5.0, ) - C:\Users\P11F70F\.nuget\packages\System.Text.Encodings.Web\4.5.0\lib\netstandard2.0
+CompleteConstruction(AppB) : take dependency System.Text.Encodings.Web [4.5.0, ) (System.Text.Encodings.Web\4.5.0\lib/netstandard2.0/System.Text.Encodings.Web.dll (4.0.3.0))
+CompleteConstruction(IdentityModel) : take dependency Newtonsoft.Json [11.0.1, ) - C:\Users\P11F70F\.nuget\packages\Newtonsoft.Json\12.0.3\lib\net45
+CompleteConstruction(IdentityModel) : take dependency Newtonsoft.Json [11.0.1, ) (Newtonsoft.Json\12.0.3\lib/net45/Newtonsoft.Json.dll (12.0.0.0))
+CompleteConstruction(IdentityModel) : take dependency System.Text.Encodings.Web [4.5.0, ) - C:\Users\P11F70F\.nuget\packages\System.Text.Encodings.Web\4.5.0\lib\netstandard2.0
+CompleteConstruction(IdentityModel) : take dependency System.Text.Encodings.Web [4.5.0, ) (System.Text.Encodings.Web\4.5.0\lib/netstandard2.0/System.Text.Encodings.Web.dll (4.0.3.0))
+CompleteConstruction(LibA) : take dependency IdentityModel [3.10.10, ) - C:\Users\P11F70F\.nuget\packages\IdentityModel\3.10.10\lib\net452
+CompleteConstruction(LibA) : take dependency IdentityModel [3.10.10, ) (IdentityModel\3.10.10\lib/net452/IdentityModel.dll (3.10.10.0))
+CompleteConstruction(LibA) : take dependency Newtonsoft.Json [12.0.1, ) - C:\Users\P11F70F\.nuget\packages\Newtonsoft.Json\12.0.1\lib\net45
+CompleteConstruction(LibA) : take dependency Newtonsoft.Json [12.0.1, ) (Newtonsoft.Json\12.0.1\lib/net45/Newtonsoft.Json.dll (12.0.0.0))
+CompleteConstruction(LibA) : take dependency Newtonsoft.Json.Bson [1.0.2, ) - C:\Users\P11F70F\.nuget\packages\Newtonsoft.Json.Bson\1.0.2\lib\net45
+CompleteConstruction(LibA) : take dependency Newtonsoft.Json.Bson [1.0.2, ) (Newtonsoft.Json.Bson\1.0.2\lib/net45/Newtonsoft.Json.Bson.dll (1.0.0.0))
+CompleteConstruction(LibA) : take dependency System.Text.Encodings.Web [4.5.0, ) - C:\Users\P11F70F\.nuget\packages\System.Text.Encodings.Web\4.5.0\lib\netstandard2.0
+CompleteConstruction(LibA) : take dependency System.Text.Encodings.Web [4.5.0, ) (System.Text.Encodings.Web\4.5.0\lib/netstandard2.0/System.Text.Encodings.Web.dll (4.0.3.0))
+CompleteConstruction(Newtonsoft.Json.Bson) : take dependency Newtonsoft.Json [12.0.1, ) - C:\Users\P11F70F\.nuget\packages\Newtonsoft.Json\12.0.1\lib\net45
+CompleteConstruction(Newtonsoft.Json.Bson) : take dependency Newtonsoft.Json [12.0.1, ) (Newtonsoft.Json\12.0.1\lib/net45/Newtonsoft.Json.dll (12.0.0.0))
+CompleteConstruction(Newtonsoft.Json.Schema) : take dependency Newtonsoft.Json [12.0.3, ) - C:\Users\P11F70F\.nuget\packages\Newtonsoft.Json\12.0.3\lib\net45
+CompleteConstruction(Newtonsoft.Json.Schema) : take dependency Newtonsoft.Json [12.0.3, ) (Newtonsoft.Json\12.0.3\lib/net45/Newtonsoft.Json.dll (12.0.0.0))
+5 NuGet packages with some runtime assemblies:
+  [IdentityModel] = IdentityModel/[3.10.10, ) (r = 1 , nd = 2)
+  [Newtonsoft.Json] = Newtonsoft.Json/[12.0.3, ) (r = 1 , nd = 0)
+  [Newtonsoft.Json.Bson] = Newtonsoft.Json.Bson/[1.0.2, ) (r = 1 , nd = 1)
+  [Newtonsoft.Json.Schema] = Newtonsoft.Json.Schema/[3.0.14, ) (r = 1 , nd = 1)
+  [System.Text.Encodings.Web] = System.Text.Encodings.Web/[4.5.0, ) (r = 1 , nd = 0)
+0 NuGet packages with no runtime assemblies:
+2 projects:
+  AppB
+  LibA
+[Curious] Assembly(Newtonsoft.Json, Version=12.0.0.0) : 2 packages
+[Curious] Assembly(Newtonsoft.Json, Version=12.0.0.0) : Newtonsoft.Json\12.0.3\lib/net45/Newtonsoft.Json.dll
+[Curious] Assembly(Newtonsoft.Json, Version=12.0.0.0) : Newtonsoft.Json\12.0.1\lib/net45/Newtonsoft.Json.dll
+[Curious] RuntimeAssembly(Newtonsoft.Json\12.0.3\lib/net45/Newtonsoft.Json.dll, Version=12.0.0.0) : 2 variants of the same package
+[Curious] RuntimeAssembly(Newtonsoft.Json\12.0.3\lib/net45/Newtonsoft.Json.dll, Version=12.0.0.0) : [12.0.3, )
+[Curious] RuntimeAssembly(Newtonsoft.Json\12.0.3\lib/net45/Newtonsoft.Json.dll, Version=12.0.0.0) : [11.0.1, )
+AssemblyReferenceOf(Newtonsoft.Json.Schema\3.0.14\lib/net45/Newtonsoft.Json.Schema.dll) : skip mscorlib (4.0.0.0) - not found (framework assembly)
+AssemblyReferenceOf(Newtonsoft.Json.Schema\3.0.14\lib/net45/Newtonsoft.Json.Schema.dll) : skip System.Runtime.Serialization (4.0.0.0) - not found (framework assembly)
+AssemblyReferenceOf(Newtonsoft.Json.Schema\3.0.14\lib/net45/Newtonsoft.Json.Schema.dll) : skip System (4.0.0.0) - not found (framework assembly)
+AssemblyReferenceOf(Newtonsoft.Json.Schema\3.0.14\lib/net45/Newtonsoft.Json.Schema.dll) : skip Newtonsoft.Json (12.0.0.0) - version match
+AssemblyReferenceOf(Newtonsoft.Json.Schema\3.0.14\lib/net45/Newtonsoft.Json.Schema.dll) : skip System.Numerics (4.0.0.0) - not found (framework assembly)
+AssemblyReferenceOf(Newtonsoft.Json.Schema\3.0.14\lib/net45/Newtonsoft.Json.Schema.dll) : skip System.Core (4.0.0.0) - not found (framework assembly)
+AssemblyReferenceOf(IdentityModel\3.10.10\lib/net452/IdentityModel.dll) : skip mscorlib (4.0.0.0) - not found (framework assembly)
+AssemblyReferenceOf(IdentityModel\3.10.10\lib/net452/IdentityModel.dll) : skip System.Net.Http (4.0.0.0) - not found (unknown)
+AssemblyReferenceOf(IdentityModel\3.10.10\lib/net452/IdentityModel.dll) : skip System (4.0.0.0) - not found (framework assembly)
+AssemblyReferenceOf(IdentityModel\3.10.10\lib/net452/IdentityModel.dll) : add Newtonsoft.Json (11.0.0.0)
+AssemblyReferenceOf(IdentityModel\3.10.10\lib/net452/IdentityModel.dll) : skip System.Core (4.0.0.0) - not found (framework assembly)
+AssemblyReferenceOf(IdentityModel\3.10.10\lib/net452/IdentityModel.dll) : skip System.Text.Encodings.Web (4.0.3.0) - version match
+AssemblyReferenceOf(Newtonsoft.Json.Bson\1.0.2\lib/net45/Newtonsoft.Json.Bson.dll) : skip mscorlib (4.0.0.0) - not found (framework assembly)
+AssemblyReferenceOf(Newtonsoft.Json.Bson\1.0.2\lib/net45/Newtonsoft.Json.Bson.dll) : skip Newtonsoft.Json (12.0.0.0) - version match
+AssemblyReferenceOf(Newtonsoft.Json.Bson\1.0.2\lib/net45/Newtonsoft.Json.Bson.dll) : skip System (4.0.0.0) - not found (framework assembly)
+AssemblyReferenceOf(Newtonsoft.Json.Bson\1.0.2\lib/net45/Newtonsoft.Json.Bson.dll) : skip System.Numerics (4.0.0.0) - not found (framework assembly)
+AssemblyReferenceOf(Newtonsoft.Json.Bson\1.0.2\lib/net45/Newtonsoft.Json.Bson.dll) : skip System.Xml (4.0.0.0) - not found (framework assembly)
+AssemblyReferenceOf(Newtonsoft.Json.Bson\1.0.2\lib/net45/Newtonsoft.Json.Bson.dll) : skip System.Core (4.0.0.0) - not found (framework assembly)
+DependencyOf(Newtonsoft.Json) : 6 packages
+DependencyOf(Newtonsoft.Json, Version = 12.0.0.0) : 5 packages
+DependencyOf(Newtonsoft.Json, Version = 12.0.0.0, Newtonsoft.Json\12.0.3\lib/net45/Newtonsoft.Json.dll, [12.0.3, )) : 2 packages
+DependencyOf(Newtonsoft.Json, Version = 12.0.0.0, Newtonsoft.Json\12.0.3\lib/net45/Newtonsoft.Json.dll, [12.0.3, )) : AppB (nd = 4)
+DependencyOf(Newtonsoft.Json, Version = 12.0.0.0, Newtonsoft.Json\12.0.3\lib/net45/Newtonsoft.Json.dll, [12.0.3, )) : Newtonsoft.Json.Schema/[3.0.14, ) (r = 1 , nd = 1)
+DependencyOf(Newtonsoft.Json, Version = 12.0.0.0, Newtonsoft.Json\12.0.3\lib/net45/Newtonsoft.Json.dll, [11.0.1, )) : 1 packages
+DependencyOf(Newtonsoft.Json, Version = 12.0.0.0, Newtonsoft.Json\12.0.3\lib/net45/Newtonsoft.Json.dll, [11.0.1, )) : IdentityModel/[3.10.10, ) (r = 1 , nd = 2)
+DependencyOf(Newtonsoft.Json, Version = 12.0.0.0, Newtonsoft.Json\12.0.1\lib/net45/Newtonsoft.Json.dll, [12.0.1, )) : 2 packages
+DependencyOf(Newtonsoft.Json, Version = 12.0.0.0, Newtonsoft.Json\12.0.1\lib/net45/Newtonsoft.Json.dll, [12.0.1, )) : LibA (nd = 4)
+DependencyOf(Newtonsoft.Json, Version = 12.0.0.0, Newtonsoft.Json\12.0.1\lib/net45/Newtonsoft.Json.dll, [12.0.1, )) : Newtonsoft.Json.Bson/[1.0.2, ) (r = 1 , nd = 1)
+DependencyOf(Newtonsoft.Json, Version = 11.0.0.0) : 1 packages
+DependencyOf(Newtonsoft.Json, Version = 11.0.0.0, ***, (, )) : 1 packages
+DependencyOf(Newtonsoft.Json, Version = 11.0.0.0, ***, (, )) : IdentityModel/[3.10.10, ) (r = 1 , nd = 2)
+NewAssemblyBindingRedirect : C:\Users\P11F70F\.nuget\packages\Newtonsoft.Json\12.0.3\lib/net45/Newtonsoft.Json.dll - Newtonsoft.Json/12.0.0.0 (30AD4FE6B2A6AEED, neutral)
+NewVulnerableNonConflictingDependency : C:\Users\P11F70F\.nuget\packages\Newtonsoft.Json.Bson\1.0.2\lib/net45/Newtonsoft.Json.Bson.dll
+Total of 1 vulnerable non-conflicting dependencies

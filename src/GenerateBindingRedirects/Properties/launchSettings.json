@@ -2,7 +2,6 @@
   "profiles": {
     "GenerateBindingRedirects": {
       "commandName": "Project",
-      "commandLineArgs": "-f src/WFM/AT/SpecFlowTest.WFM/SpecFlowTest.WFM.csproj -t obj\\BindingRedirectTargetFiles.txt -s Build\\projects.yml -w -p -o bin\\Test\\DFAcceptanceTest\\ ",
       "workingDirectory": "c:\\dayforce\\tip"
     }
   }

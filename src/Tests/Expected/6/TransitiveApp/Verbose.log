@@ -1,0 +1,53 @@
+HEAD: 
+ProjectContext(TransitiveApp\TransitiveApp.csproj) : TransitiveApp
+ProjectAssets(TransitiveApp (TransitiveApp @ Transitive.sln)) : using 2 package folders
+ProjectAssets(TransitiveApp (TransitiveApp @ Transitive.sln)) :   package folder #1 - C:\Users\P11F70F\.nuget\packages\
+ProjectAssets(TransitiveApp (TransitiveApp @ Transitive.sln)) :   package folder #2 - C:\Program Files (x86)\Microsoft Visual Studio\Shared\NuGetPackages\
+ProjectAssets(TransitiveApp (TransitiveApp @ Transitive.sln)) : Microsoft.Bcl.AsyncInterfaces/10.0.5
+ProjectAssets(TransitiveApp (TransitiveApp @ Transitive.sln)) : System.Runtime.CompilerServices.Unsafe/6.1.2
+ProjectAssets(TransitiveApp (TransitiveApp @ Transitive.sln)) : System.Threading.Channels/7.0.0
+ProjectAssets(TransitiveApp (TransitiveApp @ Transitive.sln)) : System.Threading.Tasks.Extensions/4.6.3
+ProjectAssets(TransitiveApp (TransitiveApp @ Transitive.sln)) : TransitiveApp/1.0.0
+ProjectAssets(TransitiveApp (TransitiveApp @ Transitive.sln)) : 5 libraries
+CompleteConstruction(Microsoft.Bcl.AsyncInterfaces) : take dependency System.Threading.Tasks.Extensions [4.6.3, ) - C:\Users\P11F70F\.nuget\packages\System.Threading.Tasks.Extensions\4.6.3\lib\net462
+CompleteConstruction(Microsoft.Bcl.AsyncInterfaces) : take dependency System.Threading.Tasks.Extensions [4.6.3, ) (System.Threading.Tasks.Extensions\4.6.3\lib/net462/System.Threading.Tasks.Extensions.dll (4.2.4.0))
+CompleteConstruction(System.Threading.Channels) : take dependency System.Threading.Tasks.Extensions [4.5.4, ) - C:\Users\P11F70F\.nuget\packages\System.Threading.Tasks.Extensions\4.6.3\lib\net462
+CompleteConstruction(System.Threading.Channels) : take dependency System.Threading.Tasks.Extensions [4.5.4, ) (System.Threading.Tasks.Extensions\4.6.3\lib/net462/System.Threading.Tasks.Extensions.dll (4.2.4.0))
+CompleteConstruction(System.Threading.Tasks.Extensions) : take dependency System.Runtime.CompilerServices.Unsafe [6.1.2, ) - C:\Users\P11F70F\.nuget\packages\System.Runtime.CompilerServices.Unsafe\6.1.2\lib\net462
+CompleteConstruction(System.Threading.Tasks.Extensions) : take dependency System.Runtime.CompilerServices.Unsafe [6.1.2, ) (System.Runtime.CompilerServices.Unsafe\6.1.2\lib/net462/System.Runtime.CompilerServices.Unsafe.dll (6.0.3.0))
+CompleteConstruction(TransitiveApp) : take dependency Microsoft.Bcl.AsyncInterfaces [10.0.5, ) - C:\Users\P11F70F\.nuget\packages\Microsoft.Bcl.AsyncInterfaces\10.0.5\lib\net462
+CompleteConstruction(TransitiveApp) : take dependency Microsoft.Bcl.AsyncInterfaces [10.0.5, ) (Microsoft.Bcl.AsyncInterfaces\10.0.5\lib/net462/Microsoft.Bcl.AsyncInterfaces.dll (10.0.0.5))
+CompleteConstruction(TransitiveApp) : take dependency System.Runtime.CompilerServices.Unsafe [6.1.2, ) - C:\Users\P11F70F\.nuget\packages\System.Runtime.CompilerServices.Unsafe\6.1.2\lib\net462
+CompleteConstruction(TransitiveApp) : take dependency System.Runtime.CompilerServices.Unsafe [6.1.2, ) (System.Runtime.CompilerServices.Unsafe\6.1.2\lib/net462/System.Runtime.CompilerServices.Unsafe.dll (6.0.3.0))
+CompleteConstruction(TransitiveApp) : take dependency System.Threading.Channels [7.0.0, ) - C:\Users\P11F70F\.nuget\packages\System.Threading.Channels\7.0.0\lib\net462
+CompleteConstruction(TransitiveApp) : take dependency System.Threading.Channels [7.0.0, ) (System.Threading.Channels\7.0.0\lib/net462/System.Threading.Channels.dll (7.0.0.0))
+CompleteConstruction(TransitiveApp) : take dependency System.Threading.Tasks.Extensions [4.6.3, ) - C:\Users\P11F70F\.nuget\packages\System.Threading.Tasks.Extensions\4.6.3\lib\net462
+CompleteConstruction(TransitiveApp) : take dependency System.Threading.Tasks.Extensions [4.6.3, ) (System.Threading.Tasks.Extensions\4.6.3\lib/net462/System.Threading.Tasks.Extensions.dll (4.2.4.0))
+4 NuGet packages with some runtime assemblies:
+  [Microsoft.Bcl.AsyncInterfaces] = Microsoft.Bcl.AsyncInterfaces/[10.0.5, ) (r = 1 , nd = 1)
+  [System.Runtime.CompilerServices.Unsafe] = System.Runtime.CompilerServices.Unsafe/[6.1.2, ) (r = 1 , nd = 0)
+  [System.Threading.Channels] = System.Threading.Channels/[7.0.0, ) (r = 1 , nd = 1)
+  [System.Threading.Tasks.Extensions] = System.Threading.Tasks.Extensions/[4.6.3, ) (r = 1 , nd = 1)
+0 NuGet packages with no runtime assemblies:
+1 projects:
+  TransitiveApp
+[Curious] RuntimeAssembly(System.Threading.Tasks.Extensions\4.6.3\lib/net462/System.Threading.Tasks.Extensions.dll, Version=4.2.4.0) : 2 variants of the same package
+[Curious] RuntimeAssembly(System.Threading.Tasks.Extensions\4.6.3\lib/net462/System.Threading.Tasks.Extensions.dll, Version=4.2.4.0) : [4.6.3, )
+[Curious] RuntimeAssembly(System.Threading.Tasks.Extensions\4.6.3\lib/net462/System.Threading.Tasks.Extensions.dll, Version=4.2.4.0) : [4.5.4, )
+AssemblyReferenceOf(System.Threading.Tasks.Extensions\4.6.3\lib/net462/System.Threading.Tasks.Extensions.dll) : skip mscorlib (4.0.0.0) - not found (framework assembly)
+AssemblyReferenceOf(System.Threading.Tasks.Extensions\4.6.3\lib/net462/System.Threading.Tasks.Extensions.dll) : skip System.Runtime.CompilerServices.Unsafe (6.0.3.0) - version match
+AssemblyReferenceOf(Microsoft.Bcl.AsyncInterfaces\10.0.5\lib/net462/Microsoft.Bcl.AsyncInterfaces.dll) : skip mscorlib (4.0.0.0) - not found (framework assembly)
+AssemblyReferenceOf(Microsoft.Bcl.AsyncInterfaces\10.0.5\lib/net462/Microsoft.Bcl.AsyncInterfaces.dll) : skip System.Threading.Tasks.Extensions (4.2.4.0) - version match
+AssemblyReferenceOf(System.Threading.Channels\7.0.0\lib/net462/System.Threading.Channels.dll) : skip mscorlib (4.0.0.0) - not found (framework assembly)
+AssemblyReferenceOf(System.Threading.Channels\7.0.0\lib/net462/System.Threading.Channels.dll) : add System.Threading.Tasks.Extensions (4.2.0.1)
+DependencyOf(System.Threading.Tasks.Extensions) : 4 packages
+DependencyOf(System.Threading.Tasks.Extensions, Version = 4.2.4.0) : 3 packages
+DependencyOf(System.Threading.Tasks.Extensions, Version = 4.2.4.0, System.Threading.Tasks.Extensions\4.6.3\lib/net462/System.Threading.Tasks.Extensions.dll, [4.6.3, )) : 2 packages
+DependencyOf(System.Threading.Tasks.Extensions, Version = 4.2.4.0, System.Threading.Tasks.Extensions\4.6.3\lib/net462/System.Threading.Tasks.Extensions.dll, [4.6.3, )) : Microsoft.Bcl.AsyncInterfaces/[10.0.5, ) (r = 1 , nd = 1)
+DependencyOf(System.Threading.Tasks.Extensions, Version = 4.2.4.0, System.Threading.Tasks.Extensions\4.6.3\lib/net462/System.Threading.Tasks.Extensions.dll, [4.6.3, )) : TransitiveApp (nd = 4)
+DependencyOf(System.Threading.Tasks.Extensions, Version = 4.2.4.0, System.Threading.Tasks.Extensions\4.6.3\lib/net462/System.Threading.Tasks.Extensions.dll, [4.5.4, )) : 1 packages
+DependencyOf(System.Threading.Tasks.Extensions, Version = 4.2.4.0, System.Threading.Tasks.Extensions\4.6.3\lib/net462/System.Threading.Tasks.Extensions.dll, [4.5.4, )) : System.Threading.Channels/[7.0.0, ) (r = 1 , nd = 1)
+DependencyOf(System.Threading.Tasks.Extensions, Version = 4.2.0.1) : 1 packages
+DependencyOf(System.Threading.Tasks.Extensions, Version = 4.2.0.1, ***, (, )) : 1 packages
+DependencyOf(System.Threading.Tasks.Extensions, Version = 4.2.0.1, ***, (, )) : System.Threading.Channels/[7.0.0, ) (r = 1 , nd = 1)
+NewAssemblyBindingRedirect : C:\Users\P11F70F\.nuget\packages\System.Threading.Tasks.Extensions\4.6.3\lib/net462/System.Threading.Tasks.Extensions.dll - System.Threading.Tasks.Extensions/4.2.4.0 (CC7B13FFCD2DDD51, neutral)
