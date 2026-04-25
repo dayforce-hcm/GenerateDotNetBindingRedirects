@@ -84,46 +84,17 @@ namespace Dayforce.CSharp.ProjectAssets
                 }
             }
 
-            if (lib != null)
+            if (lib.HasRuntimeAssemblies)
             {
-                if (lib.HasRuntimeAssemblies)
-                {
-                    var runtimeAssemblies = ((PackageItem)lib).RuntimeAssemblies;
-                    var path = Path.GetDirectoryName(runtimeAssemblies[0].FilePath);
-                    Log.Instance.WriteVerbose("CompleteConstruction({0}) : take dependency {1} - {2}", Name, dep, path);
-                    return NuGetDependency.Create(this, dep, runtimeAssemblies);
-                }
-                else
-                {
-                    Log.Instance.WriteVerbose("CompleteConstruction({0}) : skip dependency {1} - no runtime assemblies", Name, dep);
-                    return default;
-                }
+                var runtimeAssemblies = ((PackageItem)lib).RuntimeAssemblies;
+                var path = Path.GetDirectoryName(runtimeAssemblies[0].FilePath);
+                Log.Instance.WriteVerbose("CompleteConstruction({0}) : take dependency {1} - {2}", Name, dep, path);
+                return NuGetDependency.Create(this, dep, runtimeAssemblies);
             }
+            else
             {
-                var baseLibFolderPath = $"{packageDir}\\lib";
-                if (!Directory.Exists(baseLibFolderPath))
-                {
-                    Log.Instance.WriteVerbose("CompleteConstruction({0}) : skip dependency {1} - no runtime assemblies", Name, dep);
-                    return default;
-                }
-
-                var packageFrameworks = Directory
-                    .EnumerateDirectories(baseLibFolderPath)
-                    .Select(libFolderPath => new FrameworkFromLibFolderPath(libFolderPath))
-                    .ToList();
-                var path = packageFrameworks.Count > 0 ? packageFrameworks.GetNearest(framework)?.LibFolderPath : baseLibFolderPath;
-                if (path == null)
-                {
-                    Log.Instance.WriteVerbose("CompleteConstruction({0}) : skip dependency {1} - incompatible with \"{2}\" (\"{3}\")", Name, dep, 
-                        framework, string.Join("\" \"", packageFrameworks));
-                    return default;
-                }
-                else
-                {
-                    Log.Instance.WriteVerbose("CompleteConstruction({0}) : take dependency {1} - {2}", Name, dep, path);
-                }
-                var packageFolder = packageFolders.First(packageDir.StartsWith);
-                return NuGetDependency.Create(this, dep, packageFolder, path);
+                Log.Instance.WriteVerbose("CompleteConstruction({0}) : skip dependency {1} - no runtime assemblies", Name, dep);
+                return default;
             }
         }
 
@@ -139,12 +110,7 @@ namespace Dayforce.CSharp.ProjectAssets
                 throw new ApplicationException($"Failed to map {dep} to one of the NuGet packages on which {Name} depends.");
             }
 
-            if (lib.Version == dep.VersionRange.MinVersion || dep.VersionRange.MinVersion == null)
-            {
-                return (lib, lib.Version);
-            }
-
-            return (null, dep.VersionRange.MinVersion);
+            return (lib, lib.Version);
         }
     }
 }
